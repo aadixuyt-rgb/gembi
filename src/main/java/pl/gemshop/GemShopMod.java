@@ -22,7 +22,7 @@ public class GemShopMod implements ClientModInitializer {
         lookKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.gemshop.look", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, "category.gemshop"));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
-            Mark.tick();
+            Mark.tick(mc);
             while (openKey.wasPressed()) {
                 if (mc.currentScreen == null && mc.player != null) mc.setScreen(new GemShopScreen());
             }
