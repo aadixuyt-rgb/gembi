@@ -439,16 +439,19 @@ public class GemShopScreen extends Screen {
     }
 
     private List<Leak> leaksFor(Row r) {
-        if (!r.name().equalsIgnoreCase(Fake.TARGET)) return List.of();
+        // Dekoracyjne, fikcyjne wpisy DEMO dla każdego profilu. IP wyłącznie z TEST-NET (RFC 5737).
         List<String> pool = new ArrayList<>();
-        for (Row x : all) if (!x.name().equalsIgnoreCase(Fake.TARGET)) pool.add(x.name());
+        for (Row x : all) if (!x.name().equalsIgnoreCase(r.name())) pool.add(x.name());
         Collections.sort(pool, String.CASE_INSENSITIVE_ORDER);
+        String[] ips = {"203.0.113.47", "198.51.100.162", "192.0.2.88", "203.0.113.19", "198.51.100.24", "192.0.2.143"};
+        String[] when = {"dzisiaj", "2 dni temu", "w zeszlym tygodniu"};
         List<Leak> out = new ArrayList<>();
-        for (int i = 0; i < Fake.ROWS.length; i++) {
-            Fake.Entry e = Fake.ROWS[i];
-            String nick = e.nick();
-            if (nick == null) nick = pool.isEmpty() ? "Gracz" + (i + 1) : pool.get(Math.floorMod(salt * 31 + i * 17, pool.size()));
-            out.add(new Leak(nick, e.when(), e.ip()));
+        int count = 3;
+        for (int i = 0; i < count; i++) {
+            String nick = pool.isEmpty() ? "DemoUser" + (i + 1) : pool.get(Math.floorMod(salt * 31 + i * 17 + r.name().hashCode(), pool.size()));
+            String ip = ips[Math.floorMod(salt + i * 3 + r.name().hashCode(), ips.length)];
+            String whenText = when[Math.floorMod(salt + i + r.name().length(), when.length)];
+            out.add(new Leak(nick, whenText, ip));
         }
         return out;
     }
@@ -459,8 +462,7 @@ public class GemShopScreen extends Screen {
         if (r == null) r = new Row(profileId, profileName, false, -1, DefaultSkinHelper.getSkinTextures(profileId));
         final Row row = r;
         List<Leak> leaks = leaksFor(row);
-        // Keep a Bomba action available even when the profile has no leak rows.
-        float cardH = leaks.isEmpty() ? 28 + 58 : 28 + leaks.size() * 28 + 4;
+        float cardH = 28 + leaks.size() * 28 + 4;
         float contentH = 42 + 106 + cardH + 8 - 36;
         float viewH = H - 44 - 36;
         maxScroll[3] = Math.max(0, contentH - viewH);
@@ -484,39 +486,25 @@ public class GemShopScreen extends Screen {
 
         float cy = top + 106;
         card(12, cy, W - 24, cardH);
-        text("Historia nick\u00f3w i powi\u0105za\u0144", 22, cy + 9, th.text, 0.85f, true);
-        float tx = 22 + tw("Historia nick\u00f3w i powi\u0105za\u0144", 0.85f, true) + 6;
-        if (cd) chip(tm, tx, cy + 7, 0xFFFF4D5E);
-        String res = leaks.size() + (leaks.size() == 1 ? " wynik" : leaks.size() >= 2 && leaks.size() <= 4 ? " wyniki" : " wynik\u00f3w");
+        text("Wpisy testowe · DEMO", 22, cy + 9, th.text, 0.85f, true);
+        String res = "fikcyjne";
         text(res, W - 22 - tw(res, 0.7f, false), cy + 10, th.sub, 0.7f, false);
 
-        if (leaks.isEmpty()) {
-            ctext("Brak wyciek\\u00f3w", W / 2f, cy + 36, th.sub, 0.95f, true);
-            float bw = cd ? 92 : 66, bh = 18, bx = W - 22 - bw, by = cy + 52;
-            boolean hv = hit(bx, by, bw, bh, cd ? null : () -> Mark.start(row.id(), row.name()));
+        for (int k = 0; k < leaks.size(); k++) {
+            Leak lk = leaks.get(k);
+            float ry = cy + 28 + k * 28;
+            if (k > 0) fill(22, ry - 1, W - 44, 1, th.border);
+            text(tr.trimToWidth(lk.nick(), 90), 22, ry + 9, th.text, 0.8f, true);
+            text(lk.when(), 112, ry + 9.5f, th.sub, 0.66f, false);
+            text(lk.ip(), 174, ry + 9, 0xFFFF6B7A, 0.75f, false);
+            float bw = cd ? 74 : 54, bx = W - 22 - bw, by = ry + 4;
+            boolean hv = hit(bx, by, bw, 18, cd ? null : () -> Mark.start(row.id(), row.name()));
             int col = cd ? th.track : hv ? 0xFFFF7A5C : 0xFFFF5A3C;
-            rr(bx, by, bw, bh, 6, col);
+            rr(bx, by, bw, 18, 6, col);
             int fg = cd ? th.sub : 0xFFFFFFFF;
             circle(bx + 10, by + 10.5f, 3, fg);
             line(bx + 11.5f, by + 7.5f, bx + 13.5f, by + 5, 1.1f, fg);
             text(cd ? "Bomba (" + tm + ")" : "Bomba", bx + 17, by + 5.5f, fg, 0.75f, true);
-        } else {
-            for (int k = 0; k < leaks.size(); k++) {
-                Leak lk = leaks.get(k);
-                float ry = cy + 28 + k * 28;
-                if (k > 0) fill(22, ry - 1, W - 44, 1, th.border);
-                text(tr.trimToWidth(lk.nick(), 90), 22, ry + 9, th.text, 0.85f, true);
-                text(lk.when(), 120, ry + 9.5f, th.sub, 0.7f, false);
-                text("(" + lk.ip() + ")", 178, ry + 9, 0xFFFF6B7A, 0.8f, false);
-                float bw = cd ? 74 : 54, bx = W - 22 - bw, by = ry + 4;
-                boolean hv = hit(bx, by, bw, 18, cd ? null : () -> Mark.start(row.id(), row.name()));
-                int col = cd ? th.track : hv ? 0xFFFF7A5C : 0xFFFF5A3C;
-                rr(bx, by, bw, 18, 6, col);
-                int fg = cd ? th.sub : 0xFFFFFFFF;
-                circle(bx + 10, by + 10.5f, 3, fg);
-                line(bx + 11.5f, by + 7.5f, bx + 13.5f, by + 5, 1.1f, fg);
-                text(cd ? "Bomba (" + tm + ")" : "Bomba", bx + 17, by + 5.5f, fg, 0.75f, true);
-            }
         }
         endScissor();
     }
