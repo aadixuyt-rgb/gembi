@@ -160,7 +160,7 @@ public final class Esp {
         boolean skip = cur instanceof GemShopScreen gs && gs.tab == 1;
         if (Mark.cooldownActive() && !skip) {
             if (Mark.active()) drawBombPreview(g, mc);
-            drawHud(g, mc, Mark.id, Mark.name, Mark.active() ? Mark.remaining() : Mark.delayRemaining(), 1f);
+            drawHud(g, mc, Mark.id, Mark.name, Math.max(0L, Mark.end - System.currentTimeMillis()), 1f);
         }
     }
 
