@@ -52,6 +52,7 @@ public class ModConfig {
     public int moduleRange = 10;
     public boolean freeCamEnabled = false;
     public float freeCamSpeed = 5.0f;
+    public int guiOpacity = 85;
 
     public static ModConfig load() {
         try {
