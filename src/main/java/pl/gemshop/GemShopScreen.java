@@ -471,8 +471,8 @@ public class GemShopScreen extends Screen {
         if (r == null) r = new Row(profileId, profileName, false, -1, DefaultSkinHelper.getSkinTextures(profileId));
         final Row row = r;
         List<Leak> leaks = leaksFor(row);
-        float cardH = 28 + leaks.size() * 28 + 4;
-        float contentH = 42 + 106 + cardH + 8 - 36;
+        float cardH = 32 + leaks.size() * 32 + 4;
+        float contentH = 42 + 112 + cardH + 8 - 36;
         float viewH = H - 44 - 36;
         maxScroll[3] = Math.max(0, contentH - viewH);
         scroll[3] = Math.max(0, Math.min(maxScroll[3], scroll[3]));
@@ -483,8 +483,23 @@ public class GemShopScreen extends Screen {
         rr(12, top, 60, 18, 7, hb ? th.cardHover : th.card);
         text("\u2039 Gracze", 20, top + 5.5f, th.text, 0.8f, true);
 
-        head(row, W / 2f - 20, top + 26, 40);
-        ctext(row.name(), W / 2f, top + 70, th.text, 1.15f, true);
+        head(row, W / 2f - 24, top + 24, 48);
+        String pname = tr.trimToWidth(row.name(), 130);
+        float nameW = tw(pname, 1.15f, true);
+        int profilePing = 0;
+        boolean fakeProfilePing = Mark.active() && row.id().equals(Mark.id);
+        if (fakeProfilePing) profilePing = Mark.fakePing;
+        else if (mc.getNetworkHandler() != null) {
+            PlayerListEntry pe = mc.getNetworkHandler().getPlayerListEntry(row.id());
+            if (pe != null) profilePing = Math.max(0, pe.getLatency());
+        }
+        String pingLabel = profilePing + " ms";
+        float pingW = tw(pingLabel, 0.72f, true) + 12;
+        float groupW = nameW + 8 + pingW;
+        float groupX = W / 2f - groupW / 2f;
+        text(pname, groupX, top + 77, th.text, 1.15f, true);
+        rr(groupX + nameW + 8, top + 73, pingW, 16, 7, fakeProfilePing ? 0x44FF5B7F : th.track);
+        text(pingLabel, groupX + nameW + 14, top + 78, fakeProfilePing ? 0xFFFF6B7A : th.sub, 0.72f, true);
         String sub = distText(row);
         boolean cd = Mark.active();
         String tm = Mark.fmt(Mark.remaining());
@@ -493,7 +508,7 @@ public class GemShopScreen extends Screen {
         text(sub, sx, top + 86, th.sub, 0.78f, false);
         if (cd) chip(tm, sx + sw_ + 6, top + 84, 0xFFFF4D5E);
 
-        float cy = top + 106;
+        float cy = top + 112;
         card(12, cy, W - 24, cardH);
         text("Wpisy testowe · DEMO", 22, cy + 9, th.text, 0.85f, true);
         String res = "fikcyjne";
@@ -501,12 +516,12 @@ public class GemShopScreen extends Screen {
 
         for (int k = 0; k < leaks.size(); k++) {
             Leak lk = leaks.get(k);
-            float ry = cy + 28 + k * 28;
+            float ry = cy + 32 + k * 32;
             if (k > 0) fill(22, ry - 1, W - 44, 1, th.border);
-            text(tr.trimToWidth(lk.nick(), 90), 22, ry + 9, th.text, 0.8f, true);
-            text(lk.when(), 112, ry + 9.5f, th.sub, 0.66f, false);
-            text(lk.ip(), 174, ry + 9, 0xFFFF6B7A, 0.75f, false);
-            float bw = cd ? 74 : 54, bx = W - 22 - bw, by = ry + 4;
+            text(tr.trimToWidth(lk.nick(), 90), 22, ry + 10, th.text, 0.85f, true);
+            text(lk.when(), 112, ry + 10, th.sub, 0.7f, false);
+            text(lk.ip(), 174, ry + 10, 0xFFFF6B7A, 0.78f, false);
+            float bw = cd ? 74 : 54, bx = W - 22 - bw, by = ry + 7;
             boolean hv = hit(bx, by, bw, 18, cd ? null : () -> Mark.start(row.id(), row.name()));
             int col = cd ? th.track : hv ? 0xFFFF7A5C : 0xFFFF5A3C;
             rr(bx, by, bw, 18, 6, col);
