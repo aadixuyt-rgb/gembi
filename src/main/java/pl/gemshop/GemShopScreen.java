@@ -104,8 +104,17 @@ public class GemShopScreen extends Screen {
                 }
             }
         } catch (Exception ignored) { }
-        List<Row> l = new ArrayList<>(map.values());
-        l.sort(Comparator.comparing((Row r) -> !r.inRange()).thenComparingDouble(Row::dist).thenComparing(Row::name, String.CASE_INSENSITIVE_ORDER));
+        // Zachowaj dotychczasową kolejność: aktualizuj istniejących graczy na ich miejscach,
+        // a osoby wykryte po raz pierwszy dopisuj na końcu listy.
+        List<Row> l = new ArrayList<>();
+        Set<UUID> added = new HashSet<>();
+        for (Row previous : all) {
+            Row updated = map.get(previous.id());
+            if (updated != null && added.add(updated.id())) l.add(updated);
+        }
+        for (Row detected : map.values()) {
+            if (added.add(detected.id())) l.add(detected);
+        }
         all = l;
     }
 
