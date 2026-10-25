@@ -132,9 +132,10 @@ public class GemShopScreen extends Screen {
     private int Y(float y) { return Math.round(oy + y * s); }
     private int S(float v) { return Math.round(v * s); }
 
-    private void fill(float x, float y, float w, float h, int col) { g.fill(X(x), Y(y), X(x + w), Y(y + h), c(col)); }
+    private int guiCol(int col) { return c(Gfx.alpha(col, Math.max(0f, Math.min(1f, cfg.guiOpacity / 100f))); }
+    private void fill(float x, float y, float w, float h, int col) { g.fill(X(x), Y(y), X(x + w), Y(y + h), guiCol(col)); }
     private void rr(float x, float y, float w, float h, float r, int col) {
-        Gfx.rr(g, X(x), Y(y), X(x + w) - X(x), Y(y + h) - Y(y), Math.max(1, S(r)), c(col));
+        Gfx.rr(g, X(x), Y(y), X(x + w) - X(x), Y(y + h) - Y(y), Math.max(1, S(r)), guiCol(col));
     }
     private void circle(float cx, float cy, float r, int col) { Gfx.circle(g, X(cx), Y(cy), Math.max(1, S(r)), c(col)); }
     private void line(float x1, float y1, float x2, float y2, float w, int col) {
@@ -673,7 +674,7 @@ public class GemShopScreen extends Screen {
         title("FreeCam", lx, y);
         text("Kamera niezależna · ON/OFF", lx + 10, y + 27, th.text, 0.68f, true);
         toggle(lx + cw - 36, y + 24, cfg.freeCamEnabled, () -> { cfg.freeCamEnabled = !cfg.freeCamEnabled; cfg.save(); });
-        text("Szybkość " + String.format(Locale.ROOT, "%.1f", cfg.freeCamSpeed), lx + 10, y + 44, th.sub, 0.68f, false);
+        text("Szybkość " + Math.round(cfg.freeCamSpeed) + " / 100", lx + 10, y + 44, th.sub, 0.68f, false);
         drawFeatureSlider(lx + 10, y + 52, cw - 20, cfg.freeCamSpeed, 5);
 
         // prawa kolumna
@@ -703,11 +704,17 @@ public class GemShopScreen extends Screen {
         int[] rc = Esp.hudRect();
         String pos = "x " + rc[0] + " \u00b7 y " + rc[1];
         text(pos, rx + cw - 10 - tw(pos, 0.75f, false), y + 132.5f, th.sub, 0.75f, false);
+
+        y += 154;
+        card(rx, y, cw, 54);
+        title("Przejrzystość GUI", rx, y);
+        text(cfg.guiOpacity + " / 100", rx + 10, y + 29, th.sub, 0.72f, true);
+        drawFeatureSlider(rx + 10, y + 43, cw - 20, cfg.guiOpacity, 7);
         endScissor();
     }
 
     private void drawFeatureSlider(float x, float y, float w, float value, int which) {
-        float t = (value - 1f) / 9f;
+        float t = (value - 1f) / ((which == 5 || which == 7) ? 99f : 9f);
         rr(x, y, w, 3, 1.5f, th.track);
         rr(x, y, w * t, 3, 1.5f, accent);
         circle(x + w * t, y + 1.5f, 3, 0xFFFFFFFF);
@@ -720,11 +727,16 @@ public class GemShopScreen extends Screen {
     }
 
     private void setFeatureSlider(int which, float mouseX, float x, float w) {
-        float value = Math.max(1f, Math.min(10f, 1f + (mouseX - x) / w * 9f));
-        value = Math.round(value * 10f) / 10f;
-        if (which == 3) cfg.autoTrapSpeed = value;
-        else if (which == 4) cfg.autoWebSpeed = value;
-        else if (which == 5) cfg.freeCamSpeed = value;
+        if (which == 7) {
+            cfg.guiOpacity = Math.max(1, Math.min(100, Math.round(1f + (mouseX - x) / w * 99f)));
+        } else if (which == 5) {
+            cfg.freeCamSpeed = Math.max(1f, Math.min(100f, Math.round(1f + (mouseX - x) / w * 99f)));
+        } else {
+            float value = Math.max(1f, Math.min(10f, 1f + (mouseX - x) / w * 9f));
+            value = Math.round(value * 10f) / 10f;
+            if (which == 3) cfg.autoTrapSpeed = value;
+            else if (which == 4) cfg.autoWebSpeed = value;
+        }
         cfg.save();
     }
 
