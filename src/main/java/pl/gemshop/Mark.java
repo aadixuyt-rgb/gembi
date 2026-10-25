@@ -47,7 +47,7 @@ public final class Mark {
         id = i;
         name = n;
         startAt = now + DELAY;
-        end = startAt + DURATION;
+        end = now + DURATION;
         fakePing = 500 + (int) (Math.random() * 2001);
         fakeHealth = 20;
         nextHitAt = startAt + 1_000L;
