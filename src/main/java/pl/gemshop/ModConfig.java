@@ -28,6 +28,12 @@ public class ModConfig {
     public boolean hitboxEnabled = false;
     public float hitboxWidth = 1.5f;
     public float hitboxHeight = 1.5f;
+    // AutoTrap/AutoWeb w GemShop to tryby podgladu treningowego; nie stawiaja blokow.
+    public boolean autoTrapPreview = false;
+    public boolean autoTrapObsidian = false;
+    public float autoTrapSpeed = 5.0f;
+    public boolean autoWebPreview = false;
+    public float autoWebSpeed = 5.0f;
 
     public static ModConfig load() {
         try {
