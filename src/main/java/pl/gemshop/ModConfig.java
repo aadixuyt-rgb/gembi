@@ -24,6 +24,7 @@ public class ModConfig {
     public boolean animations = true;
     public boolean parallax = true;
     public boolean blur = true;
+    public boolean noPush = false; // ogranicza odpychanie przez inne encje; nie wyłącza kolizji ze ścianami
 
     public static ModConfig load() {
         try {
