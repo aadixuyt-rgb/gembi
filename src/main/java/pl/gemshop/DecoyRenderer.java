@@ -55,8 +55,6 @@ public final class DecoyRenderer {
         Vec3d camera = ctx.camera().getPos();
         MatrixStack matrices = ctx.matrixStack();
         VertexConsumerProvider consumers = ctx.consumers();
-        float tickDelta = mc.getRenderTickCounter().getTickDelta(true);
-
         renderingDecoy = true;
         matrices.push();
         try {
@@ -66,7 +64,6 @@ public final class DecoyRenderer {
                 decoy.getY() - camera.y,
                 decoy.getZ() - camera.z,
                 decoy.getYaw(),
-                tickDelta,
                 matrices,
                 consumers,
                 0x00F000F0
