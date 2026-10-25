@@ -290,8 +290,15 @@ public class GemShopScreen extends Screen {
     private void glint() {
         if (!cfg.parallax || closeStart >= 0) return;
         float gx = Math.max(0, Math.min(W, lmx)), gy = Math.max(0, Math.min(H, lmy));
+        // Delikatna, pulsujaca poswiata bez widocznych jasnych pierscieni.
+        float phase = (float) ((Math.sin(Util.getMeasuringTimeMs() / 900.0) + 1.0) * 0.5);
+        int baseAlpha = 2 + Math.round(phase * 2f);
         g.enableScissor(X(0), Y(0), X(W), Y(H));
-        for (int r = 100; r >= 20; r -= 16) circle(gx, gy, r, 0x07FFFFFF);
+        for (int r = 112; r >= 4; r -= 4) {
+            float falloff = 1f - r / 116f;
+            int a = Math.max(1, Math.round(baseAlpha * falloff * falloff));
+            circle(gx, gy, r, (a << 24) | 0xFFFFFF);
+        }
         g.disableScissor();
     }
 
