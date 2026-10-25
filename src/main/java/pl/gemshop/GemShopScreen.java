@@ -710,6 +710,14 @@ public class GemShopScreen extends Screen {
         title("Przejrzystość GUI", rx, y);
         text(cfg.guiOpacity + " / 100", rx + 10, y + 29, th.sub, 0.72f, true);
         drawFeatureSlider(rx + 10, y + 43, cw - 20, cfg.guiOpacity, 7);
+
+        y += 60;
+        card(rx, y, cw, 30);
+        text("PvP Bot", rx + 10, y + 11, th.text, 0.8f, true);
+        toggle(rx + cw - 36, y + 7, cfg.pvpBotEnabled, () -> {
+            cfg.pvpBotEnabled = !cfg.pvpBotEnabled;
+            cfg.save();
+        });
         endScissor();
     }
 
