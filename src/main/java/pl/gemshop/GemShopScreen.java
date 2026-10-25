@@ -546,7 +546,7 @@ public class GemShopScreen extends Screen {
 
     private void drawVisuals() {
         float top = 42 - scroll[1];
-        maxScroll[1] = 280;
+        maxScroll[1] = 350;
         scroll[1] = Math.max(0, Math.min(maxScroll[1], scroll[1]));
         scissor(0, 36, W, H - 44);
         float lx = 12, rx = 199, cw = 179, y = top;
@@ -621,6 +621,14 @@ public class GemShopScreen extends Screen {
         text(String.format(Locale.ROOT, "%.1f", cfg.autoWebSpeed), lx + cw - 25, y + 44, accent, 0.68f, true);
         drawFeatureSlider(lx + 10, y + 52, cw - 20, cfg.autoWebSpeed, 4);
 
+        y += 64;
+        card(lx, y, cw, 58);
+        title("FreeCam", lx, y);
+        text("Kamera niezależna · ON/OFF", lx + 10, y + 27, th.text, 0.68f, true);
+        toggle(lx + cw - 36, y + 24, cfg.freeCamEnabled, () -> { cfg.freeCamEnabled = !cfg.freeCamEnabled; cfg.save(); });
+        text("Szybkość " + String.format(Locale.ROOT, "%.1f", cfg.freeCamSpeed), lx + 10, y + 44, th.sub, 0.68f, false);
+        drawFeatureSlider(lx + 10, y + 52, cw - 20, cfg.freeCamSpeed, 5);
+
         // prawa kolumna
         y = top;
         card(rx, y, cw, 148);
@@ -669,6 +677,7 @@ public class GemShopScreen extends Screen {
         value = Math.round(value * 10f) / 10f;
         if (which == 3) cfg.autoTrapSpeed = value;
         else if (which == 4) cfg.autoWebSpeed = value;
+        else if (which == 5) cfg.freeCamSpeed = value;
         cfg.save();
     }
 
