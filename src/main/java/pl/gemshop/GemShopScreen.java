@@ -657,7 +657,7 @@ public class GemShopScreen extends Screen {
         float cy = top + 72;
         card(12, cy, W - 24, 222);
         String[] labels = {"Klawisz otwierania", "Szybkie szukanie (celownik)", "Animacje otwierania i zamykania", "Ruch 3D i b\u0142ysk za myszk\u0105", "Rozmycie t\u0142a (shader)", "No Push (odpychanie przez graczy)"};
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 7; i++) {
             float ry = cy + i * 26;
             if (i > 0) fill(22, ry, W - 44, 1, th.border);
             text(labels[i], 22, ry + 9.5f, th.text, 0.8f, true);
