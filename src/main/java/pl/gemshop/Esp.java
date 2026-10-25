@@ -149,7 +149,7 @@ public final class Esp {
 
         Screen cur = mc.currentScreen;
         boolean skip = cur instanceof GemShopScreen gs && gs.tab == 1;
-        if (Mark.active() && !skip) drawHud(g, mc, Mark.id, Mark.name, Mark.remaining(), 1f);
+        if (Mark.id != null && !skip) drawHud(g, mc, Mark.id, Mark.name, Mark.remaining(), 1f);
     }
 
     private static void clipLine(DrawContext g, Vector4f a, Vector4f b, int sw, int sh, float w, int col) {
@@ -193,7 +193,7 @@ public final class Esp {
         float frac = Math.max(0f, Math.min(1f, remMs / (float) Mark.DURATION));
         Gfx.rr(g, x, y, w, h, cfg.hudCompact ? 6 : 9, Gfx.alpha(th.hudBg, a));
         Gfx.outlineRR(g, x, y, w, h, cfg.hudCompact ? 6 : 9, Gfx.alpha(th.border, a));
-        String time = Mark.fmt(remMs);
+        String time = remMs <= 0 ? "TIMEOUT" : Mark.fmt(remMs);
         if (!cfg.hudCompact) {
             PlayerListEntry e = mc.getNetworkHandler() != null ? mc.getNetworkHandler().getPlayerListEntry(id) : null;
             SkinTextures sk = e != null ? e.getSkinTextures() : DefaultSkinHelper.getSkinTextures(id);
