@@ -628,7 +628,7 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 36;
+        maxScroll[2] = 62;
         scissor(0, 36, W, H - 44);
         float cw = 179;
         card(12, top, cw, 64);
@@ -647,9 +647,9 @@ public class GemShopScreen extends Screen {
             Gfx.textOrdered(g, tr, lines.get(i), X(209), Y(top + 34 + i * 7.2f), c(th.sub), 0.65f * s);
 
         float cy = top + 72;
-        card(12, cy, W - 24, 130);
-        String[] labels = {"Klawisz otwierania", "Szybkie szukanie (celownik)", "Animacje otwierania i zamykania", "Ruch 3D i b\u0142ysk za myszk\u0105", "Rozmycie t\u0142a (shader)"};
-        for (int i = 0; i < 5; i++) {
+        card(12, cy, W - 24, 156);
+        String[] labels = {"Klawisz otwierania", "Szybkie szukanie (celownik)", "Animacje otwierania i zamykania", "Ruch 3D i b\u0142ysk za myszk\u0105", "Rozmycie t\u0142a (shader)", "No Push (odpychanie przez graczy)"};
+        for (int i = 0; i < 6; i++) {
             float ry = cy + i * 26;
             if (i > 0) fill(22, ry, W - 44, 1, th.border);
             text(labels[i], 22, ry + 9.5f, th.text, 0.8f, true);
@@ -662,11 +662,12 @@ public class GemShopScreen extends Screen {
                 ctext(kn, bx + bw / 2f, ry + 9.5f, listen == kb ? accent : th.text, 0.75f, true);
             } else {
                 final int ii = i;
-                boolean on = i == 2 ? cfg.animations : i == 3 ? cfg.parallax : cfg.blur;
+                boolean on = i == 2 ? cfg.animations : i == 3 ? cfg.parallax : i == 4 ? cfg.blur : cfg.noPush;
                 toggle(W - 22 - 26, ry + 6, on, () -> {
                     if (ii == 2) cfg.animations = !cfg.animations;
                     else if (ii == 3) cfg.parallax = !cfg.parallax;
-                    else cfg.blur = !cfg.blur;
+                    else if (ii == 4) cfg.blur = !cfg.blur;
+                    else cfg.noPush = !cfg.noPush;
                     cfg.save();
                 });
             }
