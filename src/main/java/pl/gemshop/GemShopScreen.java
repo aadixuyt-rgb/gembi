@@ -132,7 +132,7 @@ public class GemShopScreen extends Screen {
     private int Y(float y) { return Math.round(oy + y * s); }
     private int S(float v) { return Math.round(v * s); }
 
-    private int guiCol(int col) { return c(Gfx.alpha(col, Math.max(0f, Math.min(1f, cfg.guiOpacity / 100f))); }
+    private int guiCol(int col) { return c(Gfx.alpha(col, Math.max(0f, Math.min(1f, cfg.guiOpacity / 100f)))); }
     private void fill(float x, float y, float w, float h, int col) { g.fill(X(x), Y(y), X(x + w), Y(y + h), guiCol(col)); }
     private void rr(float x, float y, float w, float h, float r, int col) {
         Gfx.rr(g, X(x), Y(y), X(x + w) - X(x), Y(y + h) - Y(y), Math.max(1, S(r)), guiCol(col));
