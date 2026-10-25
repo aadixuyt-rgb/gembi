@@ -92,10 +92,23 @@ public final class Esp {
                 boolean tracerTarget = cfg.tracerAll || marked;
                 if (!cfg.esp && !marked) continue;
 
-                double dx = MathHelper.lerp(partial, p.prevX, p.getX()) - p.getX();
-                double dy = MathHelper.lerp(partial, p.prevY, p.getY()) - p.getY();
-                double dz = MathHelper.lerp(partial, p.prevZ, p.getZ()) - p.getZ();
-                Box b = p.getBoundingBox().offset(dx, dy, dz);
+                // While the Bomb is active, draw the marked player's ESP at the
+                // fixed decoy position instead of outlining the real, moving player.
+                if (marked && !DecoyRenderer.hasPosition()) continue;
+                Box b;
+                if (marked) {
+                    double halfWidth = p.getWidth() * 0.5;
+                    double height = p.getHeight();
+                    b = new Box(
+                        DecoyRenderer.x() - halfWidth, DecoyRenderer.y(), DecoyRenderer.z() - halfWidth,
+                        DecoyRenderer.x() + halfWidth, DecoyRenderer.y() + height, DecoyRenderer.z() + halfWidth
+                    );
+                } else {
+                    double dx = MathHelper.lerp(partial, p.prevX, p.getX()) - p.getX();
+                    double dy = MathHelper.lerp(partial, p.prevY, p.getY()) - p.getY();
+                    double dz = MathHelper.lerp(partial, p.prevZ, p.getZ()) - p.getZ();
+                    b = p.getBoundingBox().offset(dx, dy, dz);
+                }
                 if (cfg.hitboxEnabled) {
                     double cx = (b.minX + b.maxX) * 0.5;
                     double cz = (b.minZ + b.maxZ) * 0.5;
