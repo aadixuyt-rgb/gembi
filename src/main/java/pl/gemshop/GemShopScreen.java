@@ -743,12 +743,12 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 360;
+        maxScroll[2] = 400;
         scissor(0, 36, W, H - 44);
 
         float gap = 5, left = 12, cw = (W - 24 - gap * 2) / 3f;
-        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed", "PvP Bot", "FreeCam", "Dragon Fly", "Timer", "Fast Break", "Boss"};
-        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled, cfg.pvpBotEnabled, cfg.freeCamEnabled, cfg.dragonFlyEnabled, cfg.timerEnabled, cfg.fastBreakEnabled, cfg.bossEnabled};
+        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed", "PvP Bot", "FreeCam", "Dragon Fly", "Timer", "Fast Break", "Boss", "Knockback Displacement", "X-Ray", "Fake Player (wizualny)"};
+        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled, cfg.pvpBotEnabled, cfg.freeCamEnabled, cfg.dragonFlyEnabled, cfg.timerEnabled, cfg.fastBreakEnabled, cfg.bossEnabled, cfg.knockbackDisplacementEnabled, cfg.xrayEnabled, cfg.fakePlayerPreviewEnabled};
         for (int i = 0; i < moduleNames.length; i++) {
             final int ii = i;
             int col = i % 3, row = i / 3;
@@ -766,7 +766,10 @@ public class GemShopScreen extends Screen {
                 else if (ii == 7) cfg.dragonFlyEnabled = !cfg.dragonFlyEnabled;
                 else if (ii == 8) cfg.timerEnabled = !cfg.timerEnabled;
                 else if (ii == 9) cfg.fastBreakEnabled = !cfg.fastBreakEnabled;
-                else cfg.bossEnabled = !cfg.bossEnabled;
+                else if (ii == 10) cfg.bossEnabled = !cfg.bossEnabled;
+                else if (ii == 11) cfg.knockbackDisplacementEnabled = !cfg.knockbackDisplacementEnabled;
+                else if (ii == 12) cfg.xrayEnabled = !cfg.xrayEnabled;
+                else cfg.fakePlayerPreviewEnabled = !cfg.fakePlayerPreviewEnabled;
                 cfg.save();
             });
         }
