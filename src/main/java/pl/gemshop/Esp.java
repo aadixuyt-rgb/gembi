@@ -168,7 +168,7 @@ public final class Esp {
     }
 
     private static void drawLabel(DrawContext g, MinecraftClient mc, AbstractClientPlayerEntity p, float cx, float top, int sw, int sh) {
-        int lw = 124, lh = 30;
+        int lw = 150, lh = 40;
         int x = (int) MathHelper.clamp(cx - lw / 2f, 2, sw - lw - 2);
         int y = (int) MathHelper.clamp(top - lh - 4, 2, sh - lh - 2);
         Gfx.rr(g, x, y, lw, lh, 5, 0xE60B0C12);
@@ -176,9 +176,11 @@ public final class Esp {
         Gfx.text(g, mc.textRenderer, p.getNameForScoreboard(), x + 6, y + 4, 0xFFFFFFFF, 0.9f, true);
         String hp = "\u2665 " + Math.round(p.getHealth());
         Gfx.text(g, mc.textRenderer, hp, x + lw - 6 - Gfx.width(mc.textRenderer, hp, true) * 0.85f, y + 4, 0xFFFF4D5E, 0.85f, true);
-        Gfx.text(g, mc.textRenderer, "Oznaczony \u00b7 " + Mark.fmt(Mark.remaining()), x + 6, y + 15, 0xFFFF5B7F, 0.8f, false);
-        g.fill(x + 6, y + 25, x + lw - 6, y + 27, 0x33FFFFFF);
-        g.fill(x + 6, y + 25, x + 6 + (int) ((lw - 12) * Mark.remaining() / (float) Mark.DURATION), y + 27, 0xFFFF3B4E);
+        String ping = "PING " + Mark.fakePing + " ms";
+        Gfx.text(g, mc.textRenderer, ping, x + 6, y + 15, 0xFFFF6B7A, 1.0f, true);
+        Gfx.text(g, mc.textRenderer, "BOMBA \u00b7 " + Mark.fmt(Mark.remaining()), x + 6, y + 27, 0xFFFF5B7F, 0.8f, false);
+        g.fill(x + 6, y + 35, x + lw - 6, y + 37, 0x33FFFFFF);
+        g.fill(x + 6, y + 35, x + 6 + (int) ((lw - 12) * Mark.remaining() / (float) Mark.DURATION), y + 37, 0xFFFF3B4E);
     }
 
     /** Powiadomienie cooldownu (rog ekranu). a = mnoznik przezroczystosci. */
