@@ -459,7 +459,8 @@ public class GemShopScreen extends Screen {
         if (r == null) r = new Row(profileId, profileName, false, -1, DefaultSkinHelper.getSkinTextures(profileId));
         final Row row = r;
         List<Leak> leaks = leaksFor(row);
-        float cardH = leaks.isEmpty() ? 28 + 36 : 28 + leaks.size() * 28 + 4;
+        // Keep a Bomba action available even when the profile has no leak rows.
+        float cardH = leaks.isEmpty() ? 28 + 58 : 28 + leaks.size() * 28 + 4;
         float contentH = 42 + 106 + cardH + 8 - 36;
         float viewH = H - 44 - 36;
         maxScroll[3] = Math.max(0, contentH - viewH);
@@ -490,7 +491,15 @@ public class GemShopScreen extends Screen {
         text(res, W - 22 - tw(res, 0.7f, false), cy + 10, th.sub, 0.7f, false);
 
         if (leaks.isEmpty()) {
-            ctext("Brak wyciek\u00f3w", W / 2f, cy + 28 + 12, th.sub, 0.95f, true);
+            ctext("Brak wyciek\\u00f3w", W / 2f, cy + 36, th.sub, 0.95f, true);
+            float bw = cd ? 92 : 66, bh = 18, bx = W - 22 - bw, by = cy + 52;
+            boolean hv = hit(bx, by, bw, bh, cd ? null : () -> Mark.start(row.id(), row.name()));
+            int col = cd ? th.track : hv ? 0xFFFF7A5C : 0xFFFF5A3C;
+            rr(bx, by, bw, bh, 6, col);
+            int fg = cd ? th.sub : 0xFFFFFFFF;
+            circle(bx + 10, by + 10.5f, 3, fg);
+            line(bx + 11.5f, by + 7.5f, bx + 13.5f, by + 5, 1.1f, fg);
+            text(cd ? "Bomba (" + tm + ")" : "Bomba", bx + 17, by + 5.5f, fg, 0.75f, true);
         } else {
             for (int k = 0; k < leaks.size(); k++) {
                 Leak lk = leaks.get(k);
