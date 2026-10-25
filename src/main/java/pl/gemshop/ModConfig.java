@@ -54,6 +54,8 @@ public class ModConfig {
     public boolean freeCamEnabled = false;
     public boolean dragonFlyEnabled = false;
     public boolean timerEnabled = false;
+    public boolean fastBreakEnabled = false;
+    public boolean bossEnabled = false;
     public float freeCamSpeed = 5.0f;
     public int guiOpacity = 85;
 
