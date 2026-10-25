@@ -743,12 +743,12 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 320;
+        maxScroll[2] = 360;
         scissor(0, 36, W, H - 44);
 
         float gap = 5, left = 12, cw = (W - 24 - gap * 2) / 3f;
-        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed", "PvP Bot", "FreeCam", "Dragon Fly", "Timer"};
-        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled, cfg.pvpBotEnabled, cfg.freeCamEnabled, cfg.dragonFlyEnabled, cfg.timerEnabled};
+        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed", "PvP Bot", "FreeCam", "Dragon Fly", "Timer", "Fast Break", "Boss"};
+        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled, cfg.pvpBotEnabled, cfg.freeCamEnabled, cfg.dragonFlyEnabled, cfg.timerEnabled, cfg.fastBreakEnabled, cfg.bossEnabled};
         for (int i = 0; i < moduleNames.length; i++) {
             final int ii = i;
             int col = i % 3, row = i / 3;
@@ -764,7 +764,9 @@ public class GemShopScreen extends Screen {
                 else if (ii == 5) cfg.pvpBotEnabled = !cfg.pvpBotEnabled;
                 else if (ii == 6) cfg.freeCamEnabled = !cfg.freeCamEnabled;
                 else if (ii == 7) cfg.dragonFlyEnabled = !cfg.dragonFlyEnabled;
-                else cfg.timerEnabled = !cfg.timerEnabled;
+                else if (ii == 8) cfg.timerEnabled = !cfg.timerEnabled;
+                else if (ii == 9) cfg.fastBreakEnabled = !cfg.fastBreakEnabled;
+                else cfg.bossEnabled = !cfg.bossEnabled;
                 cfg.save();
             });
         }
