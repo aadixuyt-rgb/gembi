@@ -280,20 +280,59 @@ public class GemShopScreen extends Screen {
     }
 
     private void drawShatter() {
-        int cols = 10, rows = 8;
-        float tw_ = W / (float) cols, th_ = H / (float) rows;
         float saved = A;
         A = 1f;
-        for (int i = 0; i < cols; i++) {
-            for (int j = 0; j < rows; j++) {
-                Random rn = new Random(i * 131L + j * 71L);
-                float vx = (rn.nextFloat() - 0.5f) * 2f, vy = (rn.nextFloat() - 0.65f) * 1.4f;
-                float delay = rn.nextFloat() * 0.35f;
-                float t = Math.max(0f, Math.min(1f, (closeP - delay) / (1f - delay)));
-                float x = i * tw_ + vx * 160f * t, y = j * th_ + vy * 110f * t + 120f * t * t;
-                float sz = 1f - 0.6f * t;
-                rr(x + tw_ * (1 - sz) / 2f, y + th_ * (1 - sz) / 2f, tw_ * sz, th_ * sz, 2, Gfx.alpha(th.solid, (1f - t) * 0.96f));
+        float t = clamp(closeP);
+        float fade = 1f - t;
+
+        // Panel wygląda jak tafla szkła: najpierw pojawiają się pęknięcia,
+        // a pod koniec odłamki rozsuwają się i znikają.
+        rr(0, 0, W, H, 14, Gfx.alpha(th.bg, fade));
+        int cx = W * 5 / 9, cy = H * 2 / 5;
+        int crack = Gfx.alpha(0xFFDDE7F5, Math.min(0.95f, 0.25f + t * 1.4f));
+        int highlight = Gfx.alpha(0xFFFFFFFF, Math.min(0.8f, 0.18f + t));
+
+        Random rnd = new Random(73021L);
+        int rays = 17;
+        for (int i = 0; i < rays; i++) {
+            double angle = Math.PI * 2.0 * i / rays + (rnd.nextFloat() - 0.5f) * 0.22;
+            float reach = 28f + rnd.nextFloat() * 115f;
+            float x1 = cx, y1 = cy;
+            int segments = 3 + rnd.nextInt(3);
+            for (int j = 0; j < segments; j++) {
+                float progress = (j + 1f) / segments;
+                float wobble = (rnd.nextFloat() - 0.5f) * 24f;
+                float x2 = cx + (float) Math.cos(angle) * reach * progress + (float) Math.cos(angle + Math.PI / 2) * wobble;
+                float y2 = cy + (float) Math.sin(angle) * reach * progress + (float) Math.sin(angle + Math.PI / 2) * wobble;
+                float reveal = Math.min(1f, t * 2.8f);
+                line(x1, y1, x1 + (x2 - x1) * reveal, y1 + (y2 - y1) * reveal, 0.75f, crack);
+                line(x1 - 0.4f, y1 - 0.4f, x1 + (x2 - x1) * reveal - 0.4f, y1 + (y2 - y1) * reveal - 0.4f, 0.35f, highlight);
+                if (j == 1 && rnd.nextBoolean()) {
+                    float branch = (rnd.nextFloat() - 0.5f) * 1.3f;
+                    float bx = x1 + (x2 - x1) * 0.65f, by = y1 + (y2 - y1) * 0.65f;
+                    float bl = 12f + rnd.nextFloat() * 28f;
+                    line(bx, by, bx + (float) Math.cos(angle + branch) * bl * reveal,
+                            by + (float) Math.sin(angle + branch) * bl * reveal, 0.6f, crack);
+                }
+                x1 = x2; y1 = y2;
             }
+        }
+
+        // Kanciaste odłamki odchodzą od miejsca uderzenia w końcowej fazie.
+        float shardT = Math.max(0f, (t - 0.28f) / 0.72f);
+        for (int i = 0; i < 22; i++) {
+            Random rn = new Random(991L + i * 73L);
+            float sx = 18 + rn.nextFloat() * (W - 36);
+            float sy = 14 + rn.nextFloat() * (H - 28);
+            float dx = sx - cx, dy = sy - cy;
+            float len = (float) Math.max(1.0, Math.hypot(dx, dy));
+            float x = sx + dx / len * (18f + rn.nextFloat() * 75f) * shardT;
+            float y = sy + dy / len * (18f + rn.nextFloat() * 75f) * shardT + 28f * shardT * shardT;
+            float w = 5f + rn.nextFloat() * 15f, h = 4f + rn.nextFloat() * 12f;
+            int col = Gfx.alpha(i % 2 == 0 ? 0x99DDE7F5 : 0x668EA7C5, fade * 0.75f);
+            line(x, y, x + w, y + h * 0.35f, 0.8f, col);
+            line(x + w, y + h * 0.35f, x + w * 0.45f, y + h, 0.8f, col);
+            line(x + w * 0.45f, y + h, x, y, 0.8f, col);
         }
         A = saved;
     }
