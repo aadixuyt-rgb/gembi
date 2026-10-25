@@ -5,7 +5,7 @@ import net.minecraft.sound.SoundEvents;
 
 import java.util.UUID;
 
-/** Lokalny, wizualny efekt Bomby. Nie zmienia zdrowia ani ruchu gracza na serwerze. */
+/** Local visual Bomb effect. It does not change server-side health or combat. */
 public final class Mark {
     public static final long DELAY = 2_000L;
     public static final long DURATION = 60_000L;
@@ -56,6 +56,14 @@ public final class Mark {
         nextHitAt = startAt + 1_000L;
     }
 
+    private static void finish(MinecraftClient mc) {
+        long now = System.currentTimeMillis();
+        end = now;
+        fakePing = 0;
+        timeoutUntil = now + 1_500L;
+        if (mc.player != null) mc.player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 0.55f, 1.0f);
+    }
+
     public static void tick(MinecraftClient mc) {
         if (id == null) return;
         long now = System.currentTimeMillis();
@@ -63,12 +71,9 @@ public final class Mark {
             fakeHealth = Math.max(0, fakeHealth - 1);
             nextHitAt = now + 2_500L;
             if (mc.player != null) mc.player.playSound(SoundEvents.ENTITY_PLAYER_HURT, 0.55f, 0.85f + (float) Math.random() * 0.25f);
+            if (fakeHealth <= 0) finish(mc);
         }
-        if (now >= end && timeoutUntil == 0L) {
-            fakePing = 0;
-            timeoutUntil = now + 1_500L;
-            if (mc.player != null) mc.player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 0.55f, 1.0f);
-        }
+        if (now >= end && timeoutUntil == 0L) finish(mc);
         if (timeoutUntil > 0L && now >= timeoutUntil) {
             id = null;
             name = null;
