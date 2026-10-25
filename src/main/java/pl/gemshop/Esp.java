@@ -180,14 +180,27 @@ public final class Esp {
 
     private static void drawLabel(DrawContext g, MinecraftClient mc, AbstractClientPlayerEntity p, float cx, float top, float projectedWidth, int sw, int sh) {
         int lw = Math.round(projectedWidth);
-        int lh = Math.max(14, Math.round(lw * 0.27f));
+        int lh = Math.max(23, Math.round(lw * 0.42f));
         int x = (int) MathHelper.clamp(cx - lw / 2f, 2, sw - lw - 2);
         int y = (int) MathHelper.clamp(top - lh - 3, 2, sh - lh - 2);
         Gfx.rr(g, x, y, lw, lh, 4, 0xE60B0C12);
         Gfx.outlineRR(g, x, y, lw, lh, 4, 0xFFFF3B4E);
-        float scale = Math.max(0.55f, Math.min(0.85f, lw / 150f * 0.85f));
+
+        float scale = Math.max(0.5f, Math.min(0.8f, lw / 150f * 0.85f));
         String playerName = mc.textRenderer.trimToWidth(p.getNameForScoreboard(), Math.max(18, lw - 8));
-        Gfx.text(g, mc.textRenderer, playerName, x + 4, y + 3, 0xFFFFFFFF, scale, true);
+        Gfx.text(g, mc.textRenderer, playerName, x + 4, y + 2, 0xFFFFFFFF, scale, true);
+
+        float maxHealth = Math.max(1.0f, p.getMaxHealth());
+        float health = MathHelper.clamp(p.getHealth(), 0.0f, maxHealth);
+        String healthText = Math.round(health) + "/" + Math.round(maxHealth);
+        Gfx.text(g, mc.textRenderer, healthText, x + 4, y + Math.max(10, lh - 14), 0xFFFF6678, scale, true);
+
+        int barX = x + 4;
+        int barY = y + lh - 5;
+        int barW = Math.max(4, lw - 8);
+        g.fill(barX, barY, barX + barW, barY + 2, 0xFF383843);
+        int filled = Math.round(barW * health / maxHealth);
+        if (filled > 0) g.fill(barX, barY, barX + filled, barY + 2, 0xFFFF4058);
     }
 
     public static void drawHud(DrawContext g, MinecraftClient mc, UUID id, String name, long remMs, float a) {
