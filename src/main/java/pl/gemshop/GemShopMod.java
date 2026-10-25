@@ -36,6 +36,7 @@ public class GemShopMod implements ClientModInitializer {
         });
 
         WorldRenderEvents.END.register(Esp::capture);
+        WorldRenderEvents.LAST.register(BlockGhosts::render);
         HudRenderCallback.EVENT.register((g, tc) -> Esp.renderHud(g));
     }
 }
