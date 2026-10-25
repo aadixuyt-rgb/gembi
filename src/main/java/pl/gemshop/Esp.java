@@ -136,6 +136,8 @@ public final class Esp {
                         Gfx.line(g, maxX, maxY, maxX - len, maxY, 1.4f, bc); Gfx.line(g, maxX, maxY, maxX, maxY - len, 1.4f, bc);
                         drawLabel(g, mc, p, (minX + maxX) / 2f, minY, sw, sh);
                     }
+
+                }
                     if (cfg.tracer && tracerTarget) {
                         Vector4f ctr = new Vector4f((float) ((b.minX + b.maxX) / 2 - cam.x), (float) ((b.minY + b.maxY) / 2 - cam.y), (float) ((b.minZ + b.maxZ) / 2 - cam.z), 1f);
                         VP.transform(ctr);
@@ -151,7 +153,6 @@ public final class Esp {
                         }
                         Gfx.line(g, x1, y1, x2, y2, 1.2f, 0xFFFF3B4E);
                     }
-                }
             }
         }
 
