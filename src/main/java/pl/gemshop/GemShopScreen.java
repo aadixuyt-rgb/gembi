@@ -33,7 +33,7 @@ public class GemShopScreen extends Screen {
 
     record Row(UUID id, String name, boolean inRange, double dist, SkinTextures skin) {}
     record Hit(float x0, float y0, float x1, float y1, Runnable run) {}
-    record Leak(String nick, String when, String ip) {}
+    record Leak(String status, String when, String ip) {}
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
     private final ModConfig cfg = GemShopMod.cfg;
@@ -457,7 +457,7 @@ public class GemShopScreen extends Screen {
     }
 
     private List<Leak> leaksFor(Row r) {
-        // Dekoracyjne, fikcyjne wpisy DEMO dla każdego profilu. IP wyłącznie z TEST-NET (RFC 5737).
+        // Przykładowe wpisy demonstracyjne; adresy pochodzą z zakresów testowych TEST-NET (RFC 5737).
         List<String> pool = new ArrayList<>();
         for (Row x : all) if (!x.name().equalsIgnoreCase(r.name())) pool.add(x.name());
         Collections.sort(pool, String.CASE_INSENSITIVE_ORDER);
@@ -466,10 +466,10 @@ public class GemShopScreen extends Screen {
         List<Leak> out = new ArrayList<>();
         int count = 3;
         for (int i = 0; i < count; i++) {
-            String nick = pool.isEmpty() ? "DemoUser" + (i + 1) : pool.get(Math.floorMod(salt * 31 + i * 17 + r.name().hashCode(), pool.size()));
+            String status = new Random(salt * 31L + i * 17L + r.name().hashCode()).nextBoolean() ? "zmienne" : "nie zmienne";
             String ip = ips[Math.floorMod(salt + i * 3 + r.name().hashCode(), ips.length)];
             String whenText = when[Math.floorMod(salt + i + r.name().length(), when.length)];
-            out.add(new Leak(nick, whenText, ip));
+            out.add(new Leak(status, whenText, ip));
         }
         return out;
     }
@@ -519,15 +519,13 @@ public class GemShopScreen extends Screen {
 
         float cy = top + 112;
         card(12, cy, W - 24, cardH);
-        text("Wpisy testowe · DEMO", 22, cy + 9, th.text, 0.85f, true);
-        String res = "fikcyjne";
-        text(res, W - 22 - tw(res, 0.7f, false), cy + 10, th.sub, 0.7f, false);
+        text("Przykładowe wpisy", 22, cy + 9, th.text, 0.85f, true);
 
         for (int k = 0; k < leaks.size(); k++) {
             Leak lk = leaks.get(k);
             float ry = cy + 32 + k * 32;
             if (k > 0) fill(22, ry - 1, W - 44, 1, th.border);
-            text(tr.trimToWidth(lk.nick(), 90), 22, ry + 10, th.text, 0.85f, true);
+            text(tr.trimToWidth(lk.status(), 84), 22, ry + 10, th.text, 0.85f, true);
             text(lk.when(), 112, ry + 10, th.sub, 0.7f, false);
             text(lk.ip(), 174, ry + 10, 0xFFFF6B7A, 0.78f, false);
             float bw = cd ? 74 : 54, bx = W - 22 - bw, by = ry + 7;
