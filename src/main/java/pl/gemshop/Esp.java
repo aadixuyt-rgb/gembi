@@ -158,7 +158,10 @@ public final class Esp {
 
         Screen cur = mc.currentScreen;
         boolean skip = cur instanceof GemShopScreen gs && gs.tab == 1;
-        if (Mark.id != null && !skip) drawHud(g, mc, Mark.id, Mark.name, Mark.remaining(), 1f);
+        if (Mark.cooldownActive() && !skip) {
+            if (Mark.active()) drawBombPreview(g, mc);
+            drawHud(g, mc, Mark.id, Mark.name, Mark.active() ? Mark.remaining() : Mark.delayRemaining(), 1f);
+        }
     }
 
     private static void clipLine(DrawContext g, Vector4f a, Vector4f b, int sw, int sh, float w, int col) {
@@ -193,6 +196,26 @@ public final class Esp {
     }
 
     /** Powiadomienie cooldownu (rog ekranu). a = mnoznik przezroczystosci. */
+    /** HUD atrapy z lokalnym, stopniowo zmniejszanym paskiem serc. */
+    private static void drawBombPreview(DrawContext g, MinecraftClient mc) {
+        int sw = mc.getWindow().getScaledWidth();
+        int x = Math.max(8, Math.min(sw - 188, sw / 2 - 90));
+        int y = 42;
+        int hp = Mark.fakeHealth();
+        float pulse = (float) (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 95.0));
+        Gfx.rr(g, x, y, 180, 52, 7, 0xE610111A);
+        Gfx.outlineRR(g, x, y, 180, 52, 7, 0xFFFF536B);
+        Gfx.text(g, mc.textRenderer, "BOMBA · ATRAPA", x + 8, y + 6, 0xFFFF6B7A, 0.9f, true);
+        String n = mc.textRenderer.trimToWidth(Mark.name == null ? "Gracz" : Mark.name, 112);
+        Gfx.text(g, mc.textRenderer, n, x + 8, y + 19, 0xFFFFFFFF, 0.8f, true);
+        Gfx.text(g, mc.textRenderer, "♥ " + hp + "/20", x + 118, y + 19, 0xFFFF536B, 0.8f, true);
+        g.fill(x + 8, y + 34, x + 172, y + 40, 0xFF343440);
+        int bar = 164 * hp / 20;
+        if (bar > 0) g.fill(x + 8, y + 34, x + 8 + bar, y + 40, 0xFFFF4058);
+        if (pulse > 0.78f) g.fill(x + 8, y + 34, x + 172, y + 40, 0x44FF354F);
+        Gfx.text(g, mc.textRenderer, "Lokalna symulacja trafień", x + 8, y + 43, 0xFFB8BAC8, 0.55f, false);
+    }
+
     public static void drawHud(DrawContext g, MinecraftClient mc, UUID id, String name, long remMs, float a) {
         ModConfig cfg = GemShopMod.cfg;
         Theme th = Theme.get(cfg.theme);
