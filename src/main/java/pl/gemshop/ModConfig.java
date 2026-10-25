@@ -35,6 +35,7 @@ public class ModConfig {
     public boolean autoWebPreview = false;
     public float autoWebSpeed = 5.0f;
     public boolean assistPreview = false;
+    public boolean assistPreview = false;
 
     public static ModConfig load() {
         try {
