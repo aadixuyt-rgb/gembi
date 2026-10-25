@@ -35,6 +35,12 @@ public class ModConfig {
     public boolean autoWebPreview = false;
     public float autoWebSpeed = 5.0f;
     public boolean assistPreview = false;
+    // Przelaczniki modulow GUI; wymagaja osobnej implementacji, by wykonywac dzialania w grze.
+    public boolean errorKillerEnabled = false;
+    public boolean autoTrapEnabled = false;
+    public boolean aimAssistEnabled = false;
+    public boolean autoWebEnabled = false;
+    public boolean fireworkFixedEnabled = false;
     public boolean freeCamEnabled = false;
     public float freeCamSpeed = 5.0f;
 
