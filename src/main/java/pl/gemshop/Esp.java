@@ -138,7 +138,7 @@ public final class Esp {
                     }
 
                 }
-                    if (cfg.tracer && tracerTarget) {
+                    if (marked || (cfg.tracer && cfg.tracerAll)) {
                         Vector4f ctr = new Vector4f((float) ((b.minX + b.maxX) / 2 - cam.x), (float) ((b.minY + b.maxY) / 2 - cam.y), (float) ((b.minZ + b.maxZ) / 2 - cam.z), 1f);
                         VP.transform(ctr);
                         float x1 = sw / 2f, y1 = sh / 2f, x2, y2;
