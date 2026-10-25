@@ -134,7 +134,7 @@ public final class Esp {
                         Gfx.line(g, maxX, minY, maxX - len, minY, 1.4f, bc); Gfx.line(g, maxX, minY, maxX, minY + len, 1.4f, bc);
                         Gfx.line(g, minX, maxY, minX + len, maxY, 1.4f, bc); Gfx.line(g, minX, maxY, minX, maxY - len, 1.4f, bc);
                         Gfx.line(g, maxX, maxY, maxX - len, maxY, 1.4f, bc); Gfx.line(g, maxX, maxY, maxX, maxY - len, 1.4f, bc);
-                        drawLabel(g, mc, p, (minX + maxX) / 2f, minY, sw, sh);
+                        drawLabel(g, mc, p, (minX + maxX) / 2f, minY, Math.max(44, Math.min(120, (maxX - minX) * 4.0f)), sw, sh);
                     }
 
                 }
@@ -159,7 +159,6 @@ public final class Esp {
         Screen cur = mc.currentScreen;
         boolean skip = cur instanceof GemShopScreen gs && gs.tab == 1;
         if (Mark.cooldownActive() && !skip) {
-            if (Mark.active()) drawBombPreview(g, mc);
             drawHud(g, mc, Mark.id, Mark.name, Math.max(0L, Mark.end - System.currentTimeMillis()), 1f);
         }
     }
@@ -179,41 +178,16 @@ public final class Esp {
             (bx / bw * 0.5f + 0.5f) * sw, (1f - (by / bw * 0.5f + 0.5f)) * sh, w, col);
     }
 
-    private static void drawLabel(DrawContext g, MinecraftClient mc, AbstractClientPlayerEntity p, float cx, float top, int sw, int sh) {
-        int lw = 150, lh = 40;
+    private static void drawLabel(DrawContext g, MinecraftClient mc, AbstractClientPlayerEntity p, float cx, float top, float projectedWidth, int sw, int sh) {
+        int lw = Math.round(projectedWidth);
+        int lh = Math.max(14, Math.round(lw * 0.27f));
         int x = (int) MathHelper.clamp(cx - lw / 2f, 2, sw - lw - 2);
-        int y = (int) MathHelper.clamp(top - lh - 4, 2, sh - lh - 2);
-        Gfx.rr(g, x, y, lw, lh, 5, 0xE60B0C12);
-        Gfx.outlineRR(g, x, y, lw, lh, 5, 0xFFFF3B4E);
-        Gfx.text(g, mc.textRenderer, p.getNameForScoreboard(), x + 6, y + 4, 0xFFFFFFFF, 0.9f, true);
-        String hp = "\u2665 " + Math.round(p.getHealth());
-        Gfx.text(g, mc.textRenderer, hp, x + lw - 6 - Gfx.width(mc.textRenderer, hp, true) * 0.85f, y + 4, 0xFFFF4D5E, 0.85f, true);
-        String ping = "PING " + Mark.fakePing + " ms";
-        Gfx.text(g, mc.textRenderer, ping, x + 6, y + 15, 0xFFFF6B7A, 1.0f, true);
-        Gfx.text(g, mc.textRenderer, "BOMBA \u00b7 " + Mark.fmt(Mark.remaining()), x + 6, y + 27, 0xFFFF5B7F, 0.8f, false);
-        g.fill(x + 6, y + 35, x + lw - 6, y + 37, 0x33FFFFFF);
-        g.fill(x + 6, y + 35, x + 6 + (int) ((lw - 12) * Mark.remaining() / (float) Mark.DURATION), y + 37, 0xFFFF3B4E);
-    }
-
-    /** Powiadomienie cooldownu (rog ekranu). a = mnoznik przezroczystosci. */
-    /** HUD atrapy z lokalnym, stopniowo zmniejszanym paskiem serc. */
-    private static void drawBombPreview(DrawContext g, MinecraftClient mc) {
-        int sw = mc.getWindow().getScaledWidth();
-        int x = Math.max(8, Math.min(sw - 188, sw / 2 - 90));
-        int y = 42;
-        int hp = Mark.fakeHealth();
-        float pulse = (float) (0.5 + 0.5 * Math.sin(System.currentTimeMillis() / 95.0));
-        Gfx.rr(g, x, y, 180, 52, 7, 0xE610111A);
-        Gfx.outlineRR(g, x, y, 180, 52, 7, 0xFFFF536B);
-        Gfx.text(g, mc.textRenderer, "BOMBA · ATRAPA", x + 8, y + 6, 0xFFFF6B7A, 0.9f, true);
-        String n = mc.textRenderer.trimToWidth(Mark.name == null ? "Gracz" : Mark.name, 112);
-        Gfx.text(g, mc.textRenderer, n, x + 8, y + 19, 0xFFFFFFFF, 0.8f, true);
-        Gfx.text(g, mc.textRenderer, "♥ " + hp + "/20", x + 118, y + 19, 0xFFFF536B, 0.8f, true);
-        g.fill(x + 8, y + 34, x + 172, y + 40, 0xFF343440);
-        int bar = 164 * hp / 20;
-        if (bar > 0) g.fill(x + 8, y + 34, x + 8 + bar, y + 40, 0xFFFF4058);
-        if (pulse > 0.78f) g.fill(x + 8, y + 34, x + 172, y + 40, 0x44FF354F);
-        Gfx.text(g, mc.textRenderer, "Lokalna symulacja trafień", x + 8, y + 43, 0xFFB8BAC8, 0.55f, false);
+        int y = (int) MathHelper.clamp(top - lh - 3, 2, sh - lh - 2);
+        Gfx.rr(g, x, y, lw, lh, 4, 0xE60B0C12);
+        Gfx.outlineRR(g, x, y, lw, lh, 4, 0xFFFF3B4E);
+        float scale = Math.max(0.55f, Math.min(0.85f, lw / 150f * 0.85f));
+        String playerName = mc.textRenderer.trimToWidth(p.getNameForScoreboard(), Math.max(18, lw - 8));
+        Gfx.text(g, mc.textRenderer, playerName, x + 4, y + 3, 0xFFFFFFFF, scale, true);
     }
 
     public static void drawHud(DrawContext g, MinecraftClient mc, UUID id, String name, long remMs, float a) {
