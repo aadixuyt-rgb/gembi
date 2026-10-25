@@ -1,9 +1,11 @@
 package pl.gemshop;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -105,13 +107,15 @@ public final class Gfx {
         float[] ys = {y1 + ny, y1 - ny, y2 - ny, y2 + ny};
         float area = 0;
         for (int i = 0; i < 4; i++) { int j = (i + 1) & 3; area += xs[i] * ys[j] - xs[j] * ys[i]; }
-        VertexConsumer vc = g.getVertexConsumers().getBuffer(RenderLayer.getGui());
+        VertexConsumerProvider.Immediate provider = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers();
+        VertexConsumer vc = provider.getBuffer(RenderLayer.getGui());
         Matrix4f m = g.getMatrices().peek().getPositionMatrix();
         if (area > 0) {
             for (int k = 3; k >= 0; k--) vc.vertex(m, xs[k], ys[k], 0f).color(c);
         } else {
             for (int k = 0; k < 4; k++) vc.vertex(m, xs[k], ys[k], 0f).color(c);
         }
+        provider.draw();
     }
 
     private static Text t(String s, boolean bold) {
