@@ -4,7 +4,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.block.BlockState;
@@ -55,9 +54,8 @@ public final class BlockGhosts {
                 BlockState state = entry.getValue().state();
                 matrices.push();
                 matrices.translate(pos.getX() - camera.x, pos.getY() - camera.y, pos.getZ() - camera.z);
-                VertexConsumer solid = consumers.getBuffer(RenderLayer.getSolid());
                 mc.getBlockRenderManager().renderBlockAsEntity(
-                    state, matrices, solid, 0x00F000F0, OverlayTexture.DEFAULT_UV
+                    state, matrices, consumers, 0x00F000F0, OverlayTexture.DEFAULT_UV
                 );
                 matrices.pop();
             }
