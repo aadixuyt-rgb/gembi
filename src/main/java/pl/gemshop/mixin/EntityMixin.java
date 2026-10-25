@@ -8,9 +8,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pl.gemshop.GemShopMod;
+import pl.gemshop.Mark;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
+    @Inject(method = "playStepSound", at = @At("HEAD"), cancellable = true)
+    private void gemshop$silenceMarkedPlayerFootsteps(net.minecraft.util.math.BlockPos pos,
+                                                       net.minecraft.block.BlockState state,
+                                                       CallbackInfo ci) {
+        Entity self = (Entity) (Object) this;
+        if (Mark.active() && Mark.id != null && self instanceof PlayerEntity
+                && Mark.id.equals(self.getUuid())) {
+            ci.cancel();
+        }
+    }
+
     @Inject(method = "pushAwayFrom", at = @At("HEAD"), cancellable = true)
     private void gemshop$disablePlayerPush(Entity other, CallbackInfo ci) {
         if (GemShopMod.cfg == null || !GemShopMod.cfg.noPush) return;
