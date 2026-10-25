@@ -50,6 +50,7 @@ public class ModConfig {
     public boolean antiWebEnabled = false;
     public boolean webPosterEnabled = false;
     public int moduleRange = 10;
+    public boolean pvpBotEnabled = false;
     public boolean freeCamEnabled = false;
     public float freeCamSpeed = 5.0f;
     public int guiOpacity = 85;
