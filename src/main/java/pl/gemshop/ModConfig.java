@@ -41,6 +41,15 @@ public class ModConfig {
     public boolean aimAssistEnabled = false;
     public boolean autoWebEnabled = false;
     public boolean fireworkFixedEnabled = false;
+    public boolean komarEnabled = false;
+    public boolean elytraUtilsEnabled = false;
+    public boolean fastPlaceEnabled = false;
+    public boolean triggerBotEnabled = false;
+    public boolean killAuraEnabled = false;
+    public boolean multiAuraEnabled = false;
+    public boolean antiWebEnabled = false;
+    public boolean webPosterEnabled = false;
+    public int moduleRange = 10;
     public boolean freeCamEnabled = false;
     public float freeCamSpeed = 5.0f;
 
