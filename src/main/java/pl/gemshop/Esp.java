@@ -96,6 +96,14 @@ public final class Esp {
                 double dy = MathHelper.lerp(partial, p.prevY, p.getY()) - p.getY();
                 double dz = MathHelper.lerp(partial, p.prevZ, p.getZ()) - p.getZ();
                 Box b = p.getBoundingBox().offset(dx, dy, dz);
+                if (cfg.hitboxEnabled) {
+                    double cx = (b.minX + b.maxX) * 0.5;
+                    double cz = (b.minZ + b.maxZ) * 0.5;
+                    double halfX = (b.maxX - b.minX) * cfg.hitboxWidth * 0.5;
+                    double halfZ = (b.maxZ - b.minZ) * cfg.hitboxWidth * 0.5;
+                    double height = (b.maxY - b.minY) * cfg.hitboxHeight;
+                    b = new Box(cx - halfX, b.minY, cz - halfZ, cx + halfX, b.minY + height, cz + halfZ);
+                }
                 double[] xs = {b.minX, b.maxX}, ys = {b.minY, b.maxY}, zs = {b.minZ, b.maxZ};
                 for (int i = 0; i < 8; i++) {
                     c[i].set((float) (xs[i & 1] - cam.x), (float) (ys[(i >> 1) & 1] - cam.y), (float) (zs[(i >> 2) & 1] - cam.z), 1f);
