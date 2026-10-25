@@ -728,7 +728,7 @@ public class GemShopScreen extends Screen {
             if (key == GLFW.GLFW_KEY_ESCAPE || key == GLFW.GLFW_KEY_ENTER) { filterFocus = false; return true; }
             if (Screen.isPaste(key)) {
                 String cl = mc.keyboard.getClipboard();
-                if (cl != null) { StringBuilder sb = new StringBuilder(filter); for (char ch : cl.toCharArray()) if (SharedConstants.isValidChar(ch) && sb.length() < 24) sb.append(ch); filter = sb.toString(); }
+                if (cl != null) { StringBuilder sb = new StringBuilder(filter); for (char ch : cl.toCharArray()) if (!Character.isISOControl(ch) && sb.length() < 24) sb.append(ch); filter = sb.toString(); }
                 return true;
             }
             return true;
@@ -739,7 +739,7 @@ public class GemShopScreen extends Screen {
 
     @Override
     public boolean charTyped(char chr, int mods) {
-        if (filterFocus && tab == 0 && profileId == null && SharedConstants.isValidChar(chr)) {
+        if (filterFocus && tab == 0 && profileId == null && !Character.isISOControl(chr)) {
             if (filter.length() < 24) filter += chr;
             return true;
         }
