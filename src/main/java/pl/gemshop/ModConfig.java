@@ -16,6 +16,7 @@ public class ModConfig {
     public boolean closeFade = true; // false = Rozpad
     public boolean esp = true;
     public boolean tracer = true;
+    public boolean tracerAll = false; // false: tylko oznaczony Bomba, true: wszyscy gracze
     public int hudCorner = 0;       // 0 LG, 1 PG, 2 LD, 3 PD
     public boolean hudManual = false;
     public boolean hudCompact = false;
