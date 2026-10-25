@@ -53,6 +53,7 @@ public class GemShopScreen extends Screen {
     private KeyBinding listen;
     private boolean dragging;
     private int hitboxSliderDragging = 0;
+    private boolean hitboxExpanded = false;
     private float featureSliderX = 22, featureSliderW = W - 44;
     private int dragDX, dragDY;
     private final List<Hit> hits = new ArrayList<>();
@@ -737,59 +738,76 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 128;
+        maxScroll[2] = 280;
         scissor(0, 36, W, H - 44);
-        float cw = 179;
-        card(12, top, cw, 64);
-        text("Licencja", 22, top + 9, th.sub, 0.7f, false);
-        text("W\u0142a\u015bciciel", 22, top + 19, th.text, 1.5f, true);
-        rr(22, top + 44, cw - 20, 3, 1.5f, th.track);
-        rr(22, top + 44, cw - 20, 3, 1.5f, accent);
-        text("Czas: na zawsze", 22, top + 52, th.sub, 0.65f, false);
 
-        card(199, top, cw, 64);
-        text("Status API", 209, top + 9, th.sub, 0.7f, false);
-        circle(212.5f, top + 25, 2.5f, 0xFF34D399);
-        text("Po\u0142\u0105czono", 219, top + 21, th.text, 0.9f, true);
-        List<OrderedText> lines = tr.wrapLines(Text.literal("Dane konta i licencji przyjd\u0105 z API po autoryzacji przez Discord."), (int) ((cw - 20) / 0.65f));
-        for (int i = 0; i < lines.size(); i++)
-            Gfx.textOrdered(g, tr, lines.get(i), X(209), Y(top + 34 + i * 7.2f), c(th.sub), 0.65f * s);
-
-        float cy = top + 72;
-        card(12, cy, W - 24, 222);
-        String[] labels = {"Klawisz otwierania", "Szybkie szukanie (celownik)", "Animacje otwierania i zamykania", "Ruch 3D i błysk za myszką", "Rozmycie tła (shader)", "No Push (odpychanie przez graczy)", "Hitbox (wizualny)"};
-        for (int i = 0; i < 7; i++) {
-            float ry = cy + i * 26;
-            if (i > 0) fill(22, ry, W - 44, 1, th.border);
-            text(labels[i], 22, ry + 9.5f, th.text, 0.8f, true);
-            if (i < 2) {
-                final KeyBinding kb = i == 0 ? GemShopMod.openKey : GemShopMod.lookKey;
-                String kn = keyName(kb);
-                float bw = tw(kn, 0.75f, true) + 14, bx = W - 22 - bw;
-                hit(bx, ry + 6, bw, 14, () -> listen = kb);
-                rr(bx, ry + 6, bw, 14, 5, listen == kb ? Gfx.alpha(accent, 0.3f) : th.track);
-                ctext(kn, bx + bw / 2f, ry + 9.5f, listen == kb ? accent : th.text, 0.75f, true);
-            } else {
-                final int ii = i;
-                if (ii == 6) {
-                    toggle(W - 22 - 26, ry + 6, cfg.hitboxEnabled, () -> { cfg.hitboxEnabled = !cfg.hitboxEnabled; cfg.save(); });
-                } else {
-                    boolean on = i == 2 ? cfg.animations : i == 3 ? cfg.parallax : i == 4 ? cfg.blur : cfg.noPush;
-                    toggle(W - 22 - 26, ry + 6, on, () -> {
-                        if (ii == 2) cfg.animations = !cfg.animations;
-                        else if (ii == 3) cfg.parallax = !cfg.parallax;
-                        else if (ii == 4) cfg.blur = !cfg.blur;
-                        else cfg.noPush = !cfg.noPush;
-                        cfg.save();
-                    });
-                }
-            }
+        float gap = 5, left = 12, cw = (W - 24 - gap * 2) / 3f;
+        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed"};
+        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled};
+        for (int i = 0; i < moduleNames.length; i++) {
+            final int ii = i;
+            int col = i % 3, row = i / 3;
+            float x = left + col * (cw + gap), y = top + row * 34;
+            card(x, y, cw, 29);
+            text(moduleNames[i], x + 6, y + 10, th.text, 0.67f, true);
+            toggle(x + cw - 32, y + 7, moduleStates[i], () -> {
+                if (ii == 0) cfg.errorKillerEnabled = !cfg.errorKillerEnabled;
+                else if (ii == 1) cfg.autoTrapEnabled = !cfg.autoTrapEnabled;
+                else if (ii == 2) cfg.aimAssistEnabled = !cfg.aimAssistEnabled;
+                else if (ii == 3) cfg.autoWebEnabled = !cfg.autoWebEnabled;
+                else cfg.fireworkFixedEnabled = !cfg.fireworkFixedEnabled;
+                cfg.save();
+            });
         }
-        float sy = cy + 7 * 26 + 5;
-        text("Szerokość  " + String.format(Locale.ROOT, "%.1fx", cfg.hitboxWidth), 22, sy + 2, th.text, 0.75f, true);
-        drawHitboxSlider(sy + 13, cfg.hitboxWidth, 1);
-        text("Wysokość  " + String.format(Locale.ROOT, "%.1fx", cfg.hitboxHeight), 22, sy + 30, th.text, 0.75f, true);
-        drawHitboxSlider(sy + 41, cfg.hitboxHeight, 2);
+
+        float hy = top + 72;
+        card(12, hy, W - 24, hitboxExpanded ? 92 : 30);
+        text("Hitbox (wizualny)", 22, hy + 10, th.text, 0.78f, true);
+        boolean arrowHover = hit(W - 42, hy + 4, 22, 22, () -> hitboxExpanded = !hitboxExpanded);
+        text(hitboxExpanded ? "⌄" : "›", W - 37, hy + 7, arrowHover ? accent : th.sub, 1.0f, true);
+        toggle(W - 72, hy + 7, cfg.hitboxEnabled, () -> { cfg.hitboxEnabled = !cfg.hitboxEnabled; cfg.save(); });
+        if (hitboxExpanded) {
+            text("Szerokość " + String.format(Locale.ROOT, "%.1fx", cfg.hitboxWidth), 22, hy + 37, th.text, 0.72f, true);
+            drawHitboxSlider(hy + 49, cfg.hitboxWidth, 1);
+            text("Wysokość " + String.format(Locale.ROOT, "%.1fx", cfg.hitboxHeight), 22, hy + 64, th.text, 0.72f, true);
+            drawHitboxSlider(hy + 77, cfg.hitboxHeight, 2);
+        }
+
+        float sy = hy + (hitboxExpanded ? 100 : 38);
+        String[] labels = {"Animacje", "Parallax", "Rozmycie", "No Push"};
+        for (int i = 0; i < labels.length; i++) {
+            final int ii = i;
+            int col = i % 3, row = i / 3;
+            float x = left + col * (cw + gap), y = sy + row * 34;
+            card(x, y, cw, 29);
+            text(labels[i], x + 6, y + 10, th.text, 0.7f, true);
+            boolean on = i == 0 ? cfg.animations : i == 1 ? cfg.parallax : i == 2 ? cfg.blur : cfg.noPush;
+            toggle(x + cw - 32, y + 7, on, () -> {
+                if (ii == 0) cfg.animations = !cfg.animations;
+                else if (ii == 1) cfg.parallax = !cfg.parallax;
+                else if (ii == 2) cfg.blur = !cfg.blur;
+                else cfg.noPush = !cfg.noPush;
+                cfg.save();
+            });
+        }
+
+        float ky = sy + 72;
+        card(12, ky, W - 24, 48);
+        text("Klawisz otwierania", 22, ky + 8, th.text, 0.72f, true);
+        KeyBinding kb = GemShopMod.openKey;
+        String kn = keyName(kb);
+        float bw = tw(kn, 0.75f, true) + 14, bx = W - 22 - bw;
+        hit(bx, ky + 5, bw, 14, () -> listen = kb);
+        rr(bx, ky + 5, bw, 14, 5, listen == kb ? Gfx.alpha(accent, 0.3f) : th.track);
+        ctext(kn, bx + bw / 2f, ky + 8.5f, listen == kb ? accent : th.text, 0.75f, true);
+        text("Szybkie szukanie (celownik)", 22, ky + 27, th.text, 0.72f, true);
+        KeyBinding look = GemShopMod.lookKey;
+        String ln = keyName(look);
+        float lbw = tw(ln, 0.75f, true) + 14, lbx = W - 22 - lbw;
+        hit(lbx, ky + 24, lbw, 14, () -> listen = look);
+        rr(lbx, ky + 24, lbw, 14, 5, listen == look ? Gfx.alpha(accent, 0.3f) : th.track);
+        ctext(ln, lbx + lbw / 2f, ky + 27.5f, listen == look ? accent : th.text, 0.75f, true);
+
         endScissor();
     }
 
