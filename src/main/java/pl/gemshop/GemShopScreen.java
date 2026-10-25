@@ -395,7 +395,7 @@ public class GemShopScreen extends Screen {
         text("Gem Shop", 36, 8, th.text, 1f, true);
         String sub = tab == 0 ? (profileId != null ? "Gracz \u00b7 profil" : "Gracz") : tab == 1 ? "Visuals" : "Ustawienia";
         text(sub, 36, 20, th.sub, 0.72f, false);
-        if (Mark.active()) {
+        if (Mark.cooldownActive()) {
             String t = "1 cooldown";
             float w = tw(t, 0.7f, true) + 12, x = W - 34 - w;
             rr(x, 10, w, 16, 8, Gfx.alpha(accent, 0.2f));
@@ -560,7 +560,7 @@ public class GemShopScreen extends Screen {
         rr(groupX + nameW + 8, top + 73, pingW, 16, 7, fakeProfilePing ? 0x44FF5B7F : th.track);
         text(pingLabel, groupX + nameW + 14, top + 78, fakeProfilePing ? 0xFFFF6B7A : th.sub, 0.72f, true);
         String sub = distText(row);
-        boolean cd = Mark.active();
+        boolean cd = Mark.cooldownActive();
         String tm = Mark.fmt(Mark.remaining());
         float sw_ = tw(sub, 0.78f, false), chipW = cd ? tw(tm, 0.65f, true) + 10 : 0;
         float sx = W / 2f - (sw_ + (cd ? chipW + 6 : 0)) / 2f;
