@@ -52,6 +52,8 @@ public class ModConfig {
     public int moduleRange = 10;
     public boolean pvpBotEnabled = false;
     public boolean freeCamEnabled = false;
+    public boolean dragonFlyEnabled = false;
+    public boolean timerEnabled = false;
     public float freeCamSpeed = 5.0f;
     public int guiOpacity = 85;
 
