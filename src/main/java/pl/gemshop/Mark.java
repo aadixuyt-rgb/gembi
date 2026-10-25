@@ -13,7 +13,7 @@ public final class Mark {
     public static boolean active() { return id != null && System.currentTimeMillis() < end; }
     public static long remaining() { return Math.max(0, end - System.currentTimeMillis()); }
     public static void start(UUID i, String n) { id = i; name = n; end = System.currentTimeMillis() + DURATION; fakePing = 500 + (int) (Math.random() * 2001); }
-    public static void tick() { if (id != null && System.currentTimeMillis() >= end) { id = null; name = null; fakePing = 0; } }
+    public static void tick() { if (id != null && System.currentTimeMillis() >= end) fakePing = 0; }
 
     public static String fmt(long ms) {
         long sec = (ms + 999) / 1000;
