@@ -56,6 +56,10 @@ public class ModConfig {
     public boolean timerEnabled = false;
     public boolean fastBreakEnabled = false;
     public boolean bossEnabled = false;
+    public boolean knockbackDisplacementEnabled = false;
+    public boolean xrayEnabled = false;
+    // Tylko lokalny podglad atrapy; nie zmienia stanu gracza na serwerze.
+    public boolean fakePlayerPreviewEnabled = false;
     public float freeCamSpeed = 5.0f;
     public int guiOpacity = 85;
 
