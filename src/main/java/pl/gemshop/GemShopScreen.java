@@ -428,8 +428,17 @@ public class GemShopScreen extends Screen {
         boolean hv = hit(x, y, cw, 36, null);
         rr(x, y, cw, 36, 8, hv ? th.cardHover : th.card);
         head(r, x + 8, y + 7, 22);
-        text(tr.trimToWidth(r.name(), 78), x + 36, y + 9, th.text, 0.9f, true);
-        text(distText(r), x + 36, y + 21, th.sub, 0.7f, false);
+        int ping = 0;
+        if (Mark.active() && r.id().equals(Mark.id)) {
+            ping = Mark.fakePing;
+        } else if (mc.getNetworkHandler() != null) {
+            PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(r.id());
+            if (entry != null) ping = Math.max(0, entry.getLatency());
+        }
+        String pingText = ping + " ms";
+        text(pingText, x + 36, y + 1.5f, Mark.active() && r.id().equals(Mark.id) ? 0xFFFF6B7A : th.sub, 0.58f, true);
+        text(tr.trimToWidth(r.name(), 78), x + 36, y + 10, th.text, 0.82f, true);
+        text(distText(r), x + 36, y + 22, th.sub, 0.66f, false);
         float bw = 48, bh = 18, bx = x + cw - bw - 8, by = y + 9;
         boolean hb = hit(bx, by, bw, bh, () -> openProfile(r));
         int col = hb ? Gfx.mix(accent, 0xFFFFFFFF, 0.15f) : accent;
