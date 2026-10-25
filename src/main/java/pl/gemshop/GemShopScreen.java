@@ -743,12 +743,12 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 280;
+        maxScroll[2] = 320;
         scissor(0, 36, W, H - 44);
 
         float gap = 5, left = 12, cw = (W - 24 - gap * 2) / 3f;
-        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed", "PvP Bot", "FreeCam"};
-        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled, cfg.pvpBotEnabled, cfg.freeCamEnabled};
+        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed", "PvP Bot", "FreeCam", "Dragon Fly", "Timer"};
+        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled, cfg.pvpBotEnabled, cfg.freeCamEnabled, cfg.dragonFlyEnabled, cfg.timerEnabled};
         for (int i = 0; i < moduleNames.length; i++) {
             final int ii = i;
             int col = i % 3, row = i / 3;
@@ -762,12 +762,14 @@ public class GemShopScreen extends Screen {
                 else if (ii == 3) cfg.autoWebEnabled = !cfg.autoWebEnabled;
                 else if (ii == 4) cfg.fireworkFixedEnabled = !cfg.fireworkFixedEnabled;
                 else if (ii == 5) cfg.pvpBotEnabled = !cfg.pvpBotEnabled;
-                else cfg.freeCamEnabled = !cfg.freeCamEnabled;
+                else if (ii == 6) cfg.freeCamEnabled = !cfg.freeCamEnabled;
+                else if (ii == 7) cfg.dragonFlyEnabled = !cfg.dragonFlyEnabled;
+                else cfg.timerEnabled = !cfg.timerEnabled;
                 cfg.save();
             });
         }
 
-        float hy = top + 72;
+        float hy = top + 106;
         card(12, hy, W - 24, hitboxExpanded ? 92 : 30);
         text("Hitbox (wizualny)", 22, hy + 10, th.text, 0.78f, true);
         boolean arrowHover = hit(W - 42, hy + 4, 22, 22, () -> hitboxExpanded = !hitboxExpanded);
