@@ -77,7 +77,10 @@ public class GemShopScreen extends Screen {
         String self = mc.player.getNameForScoreboard().toLowerCase(Locale.ROOT);
         for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
             if (p == mc.player) continue;
-            map.put(p.getUuid(), new Row(p.getUuid(), p.getNameForScoreboard(), true, p.distanceTo(mc.player), p.getSkinTextures()));
+            double dist = p.distanceTo(mc.player);
+            // "W zasiegu" oznacza tutaj maksymalnie 64 bloki; dalsi gracze
+            // nadal sa na liscie, ale sa oznaczeni jako poza zasiegiem.
+            map.put(p.getUuid(), new Row(p.getUuid(), p.getNameForScoreboard(), dist <= 64.0, dist, p.getSkinTextures()));
             names.add(p.getNameForScoreboard().toLowerCase(Locale.ROOT));
         }
         for (PlayerListEntry e : mc.getNetworkHandler().getPlayerList()) {
