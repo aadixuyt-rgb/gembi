@@ -20,12 +20,9 @@ public class GemShopMod implements ClientModInitializer {
         cfg = ModConfig.load();
         openKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.gemshop.open", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N, "category.gemshop"));
         lookKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.gemshop.look", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M, "category.gemshop"));
-
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
             Mark.tick(mc);
-            while (openKey.wasPressed()) {
-                if (mc.currentScreen == null && mc.player != null) mc.setScreen(new GemShopScreen());
-            }
+            while (openKey.wasPressed()) if (mc.currentScreen == null && mc.player != null) mc.setScreen(new GemShopScreen());
             while (lookKey.wasPressed()) {
                 if (mc.currentScreen == null && mc.player != null) {
                     AbstractClientPlayerEntity t = Esp.lookedAt(1f);
@@ -34,10 +31,10 @@ public class GemShopMod implements ClientModInitializer {
                 }
             }
         });
-
         WorldRenderEvents.END.register(Esp::capture);
+        WorldRenderEvents.END.register(DecoyHud::capture);
         WorldRenderEvents.LAST.register(BlockGhosts::render);
         WorldRenderEvents.LAST.register(DecoyRenderer::render);
-        HudRenderCallback.EVENT.register((g, tc) -> Esp.renderHud(g));
+        HudRenderCallback.EVENT.register((g, tc) -> { Esp.renderHud(g); DecoyHud.render(g); });
     }
 }
