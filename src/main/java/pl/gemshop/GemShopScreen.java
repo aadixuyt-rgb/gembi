@@ -53,6 +53,7 @@ public class GemShopScreen extends Screen {
     private KeyBinding listen;
     private boolean dragging;
     private int hitboxSliderDragging = 0;
+    private float featureSliderX = 22, featureSliderW = W - 44;
     private int dragDX, dragDY;
     private final List<Hit> hits = new ArrayList<>();
     private float[] clip;
@@ -652,7 +653,9 @@ public class GemShopScreen extends Screen {
         circle(x + w * t, y + 1.5f, 3, 0xFFFFFFFF);
         hit(x, y - 4, w, 11, () -> {
             hitboxSliderDragging = which;
-            setFeatureSlider(which, lmx, x, w);
+            featureSliderX = x;
+            featureSliderW = w;
+            setFeatureSlider(which, lmx, featureSliderX, featureSliderW);
         });
     }
 
@@ -788,7 +791,7 @@ public class GemShopScreen extends Screen {
         if (hitboxSliderDragging != 0) {
             updateMouse(mx, my);
             if (hitboxSliderDragging <= 2) setHitboxSlider(hitboxSliderDragging, lmx);
-            else setFeatureSlider(hitboxSliderDragging, lmx, 22, W - 44);
+            else setFeatureSlider(hitboxSliderDragging, lmx, featureSliderX, featureSliderW);
             return true;
         }
         if (dragging) {
