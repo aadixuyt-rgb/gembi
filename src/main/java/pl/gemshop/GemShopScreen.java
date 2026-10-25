@@ -556,8 +556,13 @@ public class GemShopScreen extends Screen {
 
         y += 34;
         card(lx, y, cw, 28);
-        text("Tracer do celu", lx + 10, y + 10, th.text, 0.8f, true);
+        text("Tracer", lx + 10, y + 10, th.text, 0.8f, true);
         toggle(lx + cw - 36, y + 7, cfg.tracer, () -> { cfg.tracer = !cfg.tracer; cfg.save(); });
+
+        y += 34;
+        card(lx, y, cw, 34);
+        text("Cel tracera", lx + 10, y + 12, th.text, 0.8f, true);
+        seg(lx + 76, y + 8, new String[]{"Bomba", "Wszyscy"}, cfg.tracerAll ? 1 : 0, 42, i -> { cfg.tracerAll = i == 1; cfg.save(); });
 
         // prawa kolumna
         y = top;
