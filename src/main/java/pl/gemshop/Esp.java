@@ -89,6 +89,7 @@ public final class Esp {
             for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
                 if (p == mc.player || p.isSpectator()) continue;
                 boolean marked = Mark.active() && p.getUuid().equals(Mark.id);
+                boolean tracerTarget = cfg.tracerAll || marked;
                 if (!cfg.esp && !marked) continue;
 
                 double dx = MathHelper.lerp(partial, p.prevX, p.getX()) - p.getX();
@@ -127,7 +128,7 @@ public final class Esp {
                         Gfx.line(g, maxX, maxY, maxX - len, maxY, 1.4f, bc); Gfx.line(g, maxX, maxY, maxX, maxY - len, 1.4f, bc);
                         drawLabel(g, mc, p, (minX + maxX) / 2f, minY, sw, sh);
                     }
-                    if (cfg.tracer) {
+                    if (cfg.tracer && tracerTarget) {
                         Vector4f ctr = new Vector4f((float) ((b.minX + b.maxX) / 2 - cam.x), (float) ((b.minY + b.maxY) / 2 - cam.y), (float) ((b.minZ + b.maxZ) / 2 - cam.z), 1f);
                         VP.transform(ctr);
                         float x1 = sw / 2f, y1 = sh / 2f, x2, y2;
