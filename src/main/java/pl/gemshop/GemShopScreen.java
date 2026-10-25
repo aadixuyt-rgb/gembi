@@ -52,6 +52,7 @@ public class GemShopScreen extends Screen {
     private List<Row> all = new ArrayList<>();
     private KeyBinding listen;
     private boolean dragging;
+    private int hitboxSliderDragging = 0;
     private int dragDX, dragDY;
     private final List<Hit> hits = new ArrayList<>();
     private float[] clip;
@@ -635,7 +636,7 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 62;
+        maxScroll[2] = 128;
         scissor(0, 36, W, H - 44);
         float cw = 179;
         card(12, top, cw, 64);
@@ -654,7 +655,7 @@ public class GemShopScreen extends Screen {
             Gfx.textOrdered(g, tr, lines.get(i), X(209), Y(top + 34 + i * 7.2f), c(th.sub), 0.65f * s);
 
         float cy = top + 72;
-        card(12, cy, W - 24, 156);
+        card(12, cy, W - 24, 222);
         String[] labels = {"Klawisz otwierania", "Szybkie szukanie (celownik)", "Animacje otwierania i zamykania", "Ruch 3D i b\u0142ysk za myszk\u0105", "Rozmycie t\u0142a (shader)", "No Push (odpychanie przez graczy)"};
         for (int i = 0; i < 6; i++) {
             float ry = cy + i * 26;
@@ -669,17 +670,47 @@ public class GemShopScreen extends Screen {
                 ctext(kn, bx + bw / 2f, ry + 9.5f, listen == kb ? accent : th.text, 0.75f, true);
             } else {
                 final int ii = i;
-                boolean on = i == 2 ? cfg.animations : i == 3 ? cfg.parallax : i == 4 ? cfg.blur : cfg.noPush;
-                toggle(W - 22 - 26, ry + 6, on, () -> {
-                    if (ii == 2) cfg.animations = !cfg.animations;
-                    else if (ii == 3) cfg.parallax = !cfg.parallax;
-                    else if (ii == 4) cfg.blur = !cfg.blur;
-                    else cfg.noPush = !cfg.noPush;
-                    cfg.save();
-                });
+                if (ii == 6) {
+                    toggle(W - 22 - 26, ry + 6, cfg.hitboxEnabled, () -> { cfg.hitboxEnabled = !cfg.hitboxEnabled; cfg.save(); });
+                } else {
+                    boolean on = i == 2 ? cfg.animations : i == 3 ? cfg.parallax : i == 4 ? cfg.blur : cfg.noPush;
+                    toggle(W - 22 - 26, ry + 6, on, () -> {
+                        if (ii == 2) cfg.animations = !cfg.animations;
+                        else if (ii == 3) cfg.parallax = !cfg.parallax;
+                        else if (ii == 4) cfg.blur = !cfg.blur;
+                        else cfg.noPush = !cfg.noPush;
+                        cfg.save();
+                    });
+                }
             }
         }
+        float sy = cy + 7 * 26 + 5;
+        text("Szerokość  " + String.format(Locale.ROOT, "%.1fx", cfg.hitboxWidth), 22, sy + 2, th.text, 0.75f, true);
+        drawHitboxSlider(sy + 13, cfg.hitboxWidth, 1);
+        text("Wysokość  " + String.format(Locale.ROOT, "%.1fx", cfg.hitboxHeight), 22, sy + 30, th.text, 0.75f, true);
+        drawHitboxSlider(sy + 41, cfg.hitboxHeight, 2);
         endScissor();
+    }
+
+    private void drawHitboxSlider(float y, float value, int which) {
+        float x = 22, w = W - 44;
+        float t = (value - 1f) / 4f;
+        rr(x, y, w, 3, 1.5f, th.track);
+        rr(x, y, w * t, 3, 1.5f, accent);
+        circle(x + w * t, y + 1.5f, 4, 0xFFFFFFFF);
+        hit(x, y - 5, w, 13, () -> {
+            hitboxSliderDragging = which;
+            setHitboxSlider(which, lmx);
+        });
+    }
+
+    private void setHitboxSlider(int which, float mouseX) {
+        float x = 22, w = W - 44;
+        float value = Math.max(1f, Math.min(5f, 1f + (mouseX - x) / w * 4f));
+        value = Math.round(value * 10f) / 10f;
+        if (which == 1) cfg.hitboxWidth = value;
+        else if (which == 2) cfg.hitboxHeight = value;
+        cfg.save();
     }
 
     // ------------------------------------------------------------------ input
@@ -716,6 +747,11 @@ public class GemShopScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        if (hitboxSliderDragging != 0) {
+            updateMouse(mx, my);
+            setHitboxSlider(hitboxSliderDragging, lmx);
+            return true;
+        }
         if (dragging) {
             int[] r = Esp.hudRect();
             cfg.hudX = (int) Math.max(0, Math.min(width - r[2], mx - dragDX));
@@ -727,6 +763,7 @@ public class GemShopScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mx, double my, int button) {
+        if (hitboxSliderDragging != 0) { hitboxSliderDragging = 0; cfg.save(); return true; }
         if (dragging) { dragging = false; cfg.save(); return true; }
         return super.mouseReleased(mx, my, button);
     }
