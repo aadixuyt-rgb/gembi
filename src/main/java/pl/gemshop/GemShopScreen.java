@@ -525,7 +525,7 @@ public class GemShopScreen extends Screen {
 
     private void drawVisuals() {
         float top = 42 - scroll[1];
-        maxScroll[1] = 42;
+        maxScroll[1] = 190;
         scroll[1] = Math.max(0, Math.min(maxScroll[1], scroll[1]));
         scissor(0, 36, W, H - 44);
         float lx = 12, rx = 199, cw = 179, y = top;
@@ -611,7 +611,7 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 0;
+        maxScroll[2] = 36;
         scissor(0, 36, W, H - 44);
         float cw = 179;
         card(12, top, cw, 64);
