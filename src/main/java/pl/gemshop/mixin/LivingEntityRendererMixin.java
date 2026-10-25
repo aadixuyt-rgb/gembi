@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pl.gemshop.Mark;
+import pl.gemshop.DecoyRenderer;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin {
@@ -16,7 +17,7 @@ public abstract class LivingEntityRendererMixin {
     private void gemshop$hideMarkedPlayer(LivingEntity entity, float yaw, float tickDelta,
                                           MatrixStack matrices, VertexConsumerProvider consumers,
                                           int light, CallbackInfo ci) {
-        if (Mark.active() && Mark.id != null && Mark.id.equals(entity.getUuid())) {
+        if (!DecoyRenderer.isRenderingDecoy() && Mark.active() && Mark.id != null && Mark.id.equals(entity.getUuid())) {
             ci.cancel();
         }
     }
