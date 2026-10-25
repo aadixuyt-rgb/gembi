@@ -545,7 +545,7 @@ public class GemShopScreen extends Screen {
 
     private void drawVisuals() {
         float top = 42 - scroll[1];
-        maxScroll[1] = 190;
+        maxScroll[1] = 280;
         scroll[1] = Math.max(0, Math.min(maxScroll[1], scroll[1]));
         scissor(0, 36, W, H - 44);
         float lx = 12, rx = 199, cw = 179, y = top;
@@ -596,6 +596,25 @@ public class GemShopScreen extends Screen {
         text("Cel tracera", lx + 10, y + 12, th.text, 0.8f, true);
         seg(lx + 76, y + 8, new String[]{"Bomba", "Wszyscy"}, cfg.tracerAll ? 1 : 0, 42, i -> { cfg.tracerAll = i == 1; cfg.save(); });
 
+        y += 38;
+        card(lx, y, cw, 82);
+        title("AutoTrap · podgląd", lx, y);
+        text("Tryb treningowy", lx + 10, y + 27, th.text, 0.72f, true);
+        toggle(lx + cw - 36, y + 24, cfg.autoTrapPreview, () -> { cfg.autoTrapPreview = !cfg.autoTrapPreview; cfg.save(); });
+        text("Materiał", lx + 10, y + 47, th.sub, 0.68f, false);
+        seg(lx + 68, y + 43, new String[]{"Wełna", "Obsydian"}, cfg.autoTrapObsidian ? 1 : 0, 48, i -> { cfg.autoTrapObsidian = i == 1; cfg.save(); });
+        text("Szybkość " + String.format(Locale.ROOT, "%.1f", cfg.autoTrapSpeed), lx + 10, y + 63, th.sub, 0.68f, false);
+        drawFeatureSlider(lx + 10, y + 75, cw - 20, cfg.autoTrapSpeed, 3);
+
+        y += 88;
+        card(lx, y, cw, 58);
+        title("AutoWeb · podgląd", lx, y);
+        text("Tryb treningowy", lx + 10, y + 27, th.text, 0.72f, true);
+        toggle(lx + cw - 36, y + 24, cfg.autoWebPreview, () -> { cfg.autoWebPreview = !cfg.autoWebPreview; cfg.save(); });
+        text("Szybkość", lx + 10, y + 44, th.sub, 0.68f, false);
+        text(String.format(Locale.ROOT, "%.1f", cfg.autoWebSpeed), lx + cw - 25, y + 44, accent, 0.68f, true);
+        drawFeatureSlider(lx + 10, y + 52, cw - 20, cfg.autoWebSpeed, 4);
+
         // prawa kolumna
         y = top;
         card(rx, y, cw, 148);
@@ -624,6 +643,25 @@ public class GemShopScreen extends Screen {
         String pos = "x " + rc[0] + " \u00b7 y " + rc[1];
         text(pos, rx + cw - 10 - tw(pos, 0.75f, false), y + 132.5f, th.sub, 0.75f, false);
         endScissor();
+    }
+
+    private void drawFeatureSlider(float x, float y, float w, float value, int which) {
+        float t = (value - 1f) / 9f;
+        rr(x, y, w, 3, 1.5f, th.track);
+        rr(x, y, w * t, 3, 1.5f, accent);
+        circle(x + w * t, y + 1.5f, 3, 0xFFFFFFFF);
+        hit(x, y - 4, w, 11, () -> {
+            hitboxSliderDragging = which;
+            setFeatureSlider(which, lmx, x, w);
+        });
+    }
+
+    private void setFeatureSlider(int which, float mouseX, float x, float w) {
+        float value = Math.max(1f, Math.min(10f, 1f + (mouseX - x) / w * 9f));
+        value = Math.round(value * 10f) / 10f;
+        if (which == 3) cfg.autoTrapSpeed = value;
+        else if (which == 4) cfg.autoWebSpeed = value;
+        cfg.save();
     }
 
     // ------------------------------------------------------------------ zakladka: Ustawienia
@@ -749,7 +787,8 @@ public class GemShopScreen extends Screen {
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
         if (hitboxSliderDragging != 0) {
             updateMouse(mx, my);
-            setHitboxSlider(hitboxSliderDragging, lmx);
+            if (hitboxSliderDragging <= 2) setHitboxSlider(hitboxSliderDragging, lmx);
+            else setFeatureSlider(hitboxSliderDragging, lmx, 22, W - 44);
             return true;
         }
         if (dragging) {
