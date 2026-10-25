@@ -25,6 +25,9 @@ public class ModConfig {
     public boolean parallax = true;
     public boolean blur = true;
     public boolean noPush = false; // ogranicza odpychanie przez inne encje; nie wyłącza kolizji ze ścianami
+    public boolean hitboxEnabled = false;
+    public float hitboxWidth = 1.5f;
+    public float hitboxHeight = 1.5f;
 
     public static ModConfig load() {
         try {
