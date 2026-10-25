@@ -669,14 +669,6 @@ public class GemShopScreen extends Screen {
         text(String.format(Locale.ROOT, "%.1f", cfg.autoWebSpeed), lx + cw - 25, y + 44, accent, 0.68f, true);
         drawFeatureSlider(lx + 10, y + 52, cw - 20, cfg.autoWebSpeed, 4);
 
-        y += 64;
-        card(lx, y, cw, 58);
-        title("FreeCam", lx, y);
-        text("Kamera niezależna · ON/OFF", lx + 10, y + 27, th.text, 0.68f, true);
-        toggle(lx + cw - 36, y + 24, cfg.freeCamEnabled, () -> { cfg.freeCamEnabled = !cfg.freeCamEnabled; cfg.save(); });
-        text("Szybkość " + Math.round(cfg.freeCamSpeed) + " / 100", lx + 10, y + 44, th.sub, 0.68f, false);
-        drawFeatureSlider(lx + 10, y + 52, cw - 20, cfg.freeCamSpeed, 5);
-
         // prawa kolumna
         y = top;
         card(rx, y, cw, 148);
@@ -711,13 +703,6 @@ public class GemShopScreen extends Screen {
         text(cfg.guiOpacity + " / 100", rx + 10, y + 29, th.sub, 0.72f, true);
         drawFeatureSlider(rx + 10, y + 43, cw - 20, cfg.guiOpacity, 7);
 
-        y += 60;
-        card(rx, y, cw, 30);
-        text("PvP Bot", rx + 10, y + 11, th.text, 0.8f, true);
-        toggle(rx + cw - 36, y + 7, cfg.pvpBotEnabled, () -> {
-            cfg.pvpBotEnabled = !cfg.pvpBotEnabled;
-            cfg.save();
-        });
         endScissor();
     }
 
@@ -762,8 +747,8 @@ public class GemShopScreen extends Screen {
         scissor(0, 36, W, H - 44);
 
         float gap = 5, left = 12, cw = (W - 24 - gap * 2) / 3f;
-        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed"};
-        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled};
+        String[] moduleNames = {"Error Killer", "AutoTrap", "AimAssist", "AutoWeb", "FireworkFixed", "PvP Bot", "FreeCam"};
+        boolean[] moduleStates = {cfg.errorKillerEnabled, cfg.autoTrapEnabled, cfg.aimAssistEnabled, cfg.autoWebEnabled, cfg.fireworkFixedEnabled, cfg.pvpBotEnabled, cfg.freeCamEnabled};
         for (int i = 0; i < moduleNames.length; i++) {
             final int ii = i;
             int col = i % 3, row = i / 3;
@@ -775,7 +760,9 @@ public class GemShopScreen extends Screen {
                 else if (ii == 1) cfg.autoTrapEnabled = !cfg.autoTrapEnabled;
                 else if (ii == 2) cfg.aimAssistEnabled = !cfg.aimAssistEnabled;
                 else if (ii == 3) cfg.autoWebEnabled = !cfg.autoWebEnabled;
-                else cfg.fireworkFixedEnabled = !cfg.fireworkFixedEnabled;
+                else if (ii == 4) cfg.fireworkFixedEnabled = !cfg.fireworkFixedEnabled;
+                else if (ii == 5) cfg.pvpBotEnabled = !cfg.pvpBotEnabled;
+                else cfg.freeCamEnabled = !cfg.freeCamEnabled;
                 cfg.save();
             });
         }
