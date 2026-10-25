@@ -598,6 +598,11 @@ public class GemShopScreen extends Screen {
         seg(lx + 76, y + 8, new String[]{"Bomba", "Wszyscy"}, cfg.tracerAll ? 1 : 0, 42, i -> { cfg.tracerAll = i == 1; cfg.save(); });
 
         y += 38;
+        card(lx, y, cw, 28);
+        text("Player Assist · podgląd", lx + 10, y + 10, th.text, 0.75f, true);
+        toggle(lx + cw - 36, y + 7, cfg.assistPreview, () -> { cfg.assistPreview = !cfg.assistPreview; cfg.save(); });
+
+        y += 34;
         card(lx, y, cw, 82);
         title("AutoTrap · podgląd", lx, y);
         text("Tryb treningowy", lx + 10, y + 27, th.text, 0.72f, true);
