@@ -34,6 +34,7 @@ public class ModConfig {
     public float autoTrapSpeed = 5.0f;
     public boolean autoWebPreview = false;
     public float autoWebSpeed = 5.0f;
+    public boolean assistPreview = false;
 
     public static ModConfig load() {
         try {
