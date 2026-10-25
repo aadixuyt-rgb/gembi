@@ -16,11 +16,13 @@ public final class Mark {
     public static int fakePing = 0;
     private static long nextHitAt;
     private static int fakeHealth = 20;
+    private static long timeoutUntil;
 
     private Mark() {}
 
     public static boolean cooldownActive() {
-        return id != null && System.currentTimeMillis() < end;
+        long now = System.currentTimeMillis();
+        return id != null && (now < end || now < timeoutUntil);
     }
 
     public static boolean active() {
@@ -50,6 +52,7 @@ public final class Mark {
         end = now + DURATION;
         fakePing = 500 + (int) (Math.random() * 2001);
         fakeHealth = 20;
+        timeoutUntil = 0L;
         nextHitAt = startAt + 1_000L;
     }
 
@@ -61,11 +64,15 @@ public final class Mark {
             nextHitAt = now + 2_500L;
             if (mc.player != null) mc.player.playSound(SoundEvents.ENTITY_PLAYER_HURT, 0.55f, 0.85f + (float) Math.random() * 0.25f);
         }
-        if (now >= end) {
+        if (now >= end && timeoutUntil == 0L) {
             fakePing = 0;
+            timeoutUntil = now + 1_500L;
             if (mc.player != null) mc.player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 0.55f, 1.0f);
+        }
+        if (timeoutUntil > 0L && now >= timeoutUntil) {
             id = null;
             name = null;
+            timeoutUntil = 0L;
         }
     }
 
