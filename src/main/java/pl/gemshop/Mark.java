@@ -1,11 +1,8 @@
 package pl.gemshop;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundEvents;
-
 import java.util.UUID;
 
-/** Local visual Bomb effect. It does not change server-side health or combat. */
+/** Local Bomb marker timer. Visual effects are handled by Esp. */
 public final class Mark {
     public static final long DELAY = 2_000L;
     public static final long DURATION = 60_000L;
@@ -13,9 +10,6 @@ public final class Mark {
     public static String name;
     public static long startAt;
     public static long end;
-    public static int fakePing = 0;
-    private static long nextHitAt;
-    private static int fakeHealth = 20;
     private static long timeoutUntil;
 
     private Mark() {}
@@ -38,42 +32,18 @@ public final class Mark {
         return Math.max(0, startAt - System.currentTimeMillis());
     }
 
-    public static long elapsed() {
-        return active() ? Math.max(0, System.currentTimeMillis() - startAt) : 0;
-    }
-
-    public static int fakeHealth() { return fakeHealth; }
-
     public static void start(UUID i, String n) {
         long now = System.currentTimeMillis();
         id = i;
         name = n;
         startAt = now + DELAY;
         end = now + DURATION;
-        fakePing = 500 + (int) (Math.random() * 2001);
-        fakeHealth = 20;
         timeoutUntil = 0L;
-        nextHitAt = startAt + 1_000L;
     }
 
-    private static void finish(MinecraftClient mc) {
+    public static void tick() {
         long now = System.currentTimeMillis();
-        end = now;
-        fakePing = 0;
-        timeoutUntil = now + 1_500L;
-        if (mc.player != null) mc.player.playSound(SoundEvents.ENTITY_ITEM_BREAK, 0.55f, 1.0f);
-    }
-
-    public static void tick(MinecraftClient mc) {
-        if (id == null) return;
-        long now = System.currentTimeMillis();
-        if (now >= startAt && now < end && now >= nextHitAt) {
-            fakeHealth = Math.max(0, fakeHealth - 1);
-            nextHitAt = now + 2_500L;
-            if (mc.player != null) mc.player.playSound(SoundEvents.ENTITY_PLAYER_HURT, 0.55f, 0.85f + (float) Math.random() * 0.25f);
-            if (fakeHealth <= 0) finish(mc);
-        }
-        if (now >= end && timeoutUntil == 0L) finish(mc);
+        if (id != null && now >= end && timeoutUntil == 0L) timeoutUntil = now + 1_500L;
         if (timeoutUntil > 0L && now >= timeoutUntil) {
             id = null;
             name = null;
