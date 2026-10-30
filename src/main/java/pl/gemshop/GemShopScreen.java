@@ -516,7 +516,7 @@ public class GemShopScreen extends Screen {
         List<Leak> out = new ArrayList<>();
         int count = 3;
         for (int i = 0; i < count; i++) {
-            String status = new Random(salt * 31L + i * 17L + r.name().hashCode()).nextBoolean() ? "zmienne" : "nie zmienne";
+            String status = i < 2 ? "zmienne" : "nie zmienne";
             String ip = ips[Math.floorMod(salt + i * 3 + r.name().hashCode(), ips.length)];
             String whenText = when[Math.floorMod(salt + i + r.name().length(), when.length)];
             out.add(new Leak(status, whenText, ip));
