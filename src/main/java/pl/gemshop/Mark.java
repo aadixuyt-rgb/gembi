@@ -10,6 +10,7 @@ public final class Mark {
     public static String name;
     public static long startAt;
     public static long end;
+    public static int fakePing;
     private static long timeoutUntil;
 
     private Mark() {}
@@ -38,6 +39,7 @@ public final class Mark {
         name = n;
         startAt = now + DELAY;
         end = now + DURATION;
+        fakePing = 500 + (int) (Math.random() * 2001);
         timeoutUntil = 0L;
     }
 
@@ -47,6 +49,7 @@ public final class Mark {
         if (timeoutUntil > 0L && now >= timeoutUntil) {
             id = null;
             name = null;
+            fakePing = 0;
             timeoutUntil = 0L;
         }
     }
