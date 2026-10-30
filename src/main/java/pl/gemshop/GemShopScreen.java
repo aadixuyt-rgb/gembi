@@ -281,60 +281,94 @@ public class GemShopScreen extends Screen {
         }
     }
 
+    // Wypełnianie trójkątnego kawałka szkła metodą scanline.
+    private void shardTriangle(float ax, float ay, float bx, float by, float cx, float cy, int color) {
+        float minY = Math.min(ay, Math.min(by, cy));
+        float maxY = Math.max(ay, Math.max(by, cy));
+        for (int py = (int) Math.floor(minY); py <= (int) Math.ceil(maxY); py++) {
+            float scan = py + 0.5f;
+            float[] xs = new float[3];
+            int count = 0;
+            float[] vx = {ax, bx, cx}, vy = {ay, by, cy};
+            for (int i = 0; i < 3; i++) {
+                int j = (i + 1) % 3;
+                if ((scan >= Math.min(vy[i], vy[j])) && (scan < Math.max(vy[i], vy[j])) && Math.abs(vy[j] - vy[i]) > 0.0001f) {
+                    xs[count++] = vx[i] + (scan - vy[i]) * (vx[j] - vx[i]) / (vy[j] - vy[i]);
+                }
+            }
+            if (count >= 2) {
+                float left = Math.min(xs[0], xs[1]), right = Math.max(xs[0], xs[1]);
+                fill(left, py, Math.max(1f, right - left), 1.15f, color);
+            }
+        }
+    }
+
     private void drawShatter() {
         float saved = A;
         A = 1f;
         float t = clamp(closeP);
         float fade = 1f - t;
-
-        // Panel wygląda jak tafla szkła: najpierw pojawiają się pęknięcia,
-        // a pod koniec odłamki rozsuwają się i znikają.
-        rr(0, 0, W, H, 14, Gfx.alpha(th.bg, fade));
         int cx = W * 5 / 9, cy = H * 2 / 5;
-        int crack = Gfx.alpha(0xFFDDE7F5, Math.min(0.95f, 0.25f + t * 1.4f));
-        int highlight = Gfx.alpha(0xFFFFFFFF, Math.min(0.8f, 0.18f + t));
 
-        Random rnd = new Random(73021L);
-        int rays = 17;
-        for (int i = 0; i < rays; i++) {
-            double angle = Math.PI * 2.0 * i / rays + (rnd.nextFloat() - 0.5f) * 0.22;
-            float reach = 28f + rnd.nextFloat() * 115f;
-            float x1 = cx, y1 = cy;
-            int segments = 3 + rnd.nextInt(3);
-            for (int j = 0; j < segments; j++) {
-                float progress = (j + 1f) / segments;
-                float wobble = (rnd.nextFloat() - 0.5f) * 24f;
-                float x2 = cx + (float) Math.cos(angle) * reach * progress + (float) Math.cos(angle + Math.PI / 2) * wobble;
-                float y2 = cy + (float) Math.sin(angle) * reach * progress + (float) Math.sin(angle + Math.PI / 2) * wobble;
-                float reveal = Math.min(1f, t * 2.8f);
-                line(x1, y1, x1 + (x2 - x1) * reveal, y1 + (y2 - y1) * reveal, 0.75f, crack);
-                line(x1 - 0.4f, y1 - 0.4f, x1 + (x2 - x1) * reveal - 0.4f, y1 + (y2 - y1) * reveal - 0.4f, 0.35f, highlight);
-                if (j == 1 && rnd.nextBoolean()) {
-                    float branch = (rnd.nextFloat() - 0.5f) * 1.3f;
-                    float bx = x1 + (x2 - x1) * 0.65f, by = y1 + (y2 - y1) * 0.65f;
-                    float bl = 12f + rnd.nextFloat() * 28f;
-                    line(bx, by, bx + (float) Math.cos(angle + branch) * bl * reveal,
-                            by + (float) Math.sin(angle + branch) * bl * reveal, 0.6f, crack);
-                }
-                x1 = x2; y1 = y2;
+        // W pierwszej chwili cała tafla jest jeszcze widoczna, potem pęka na duże pola.
+        rr(0, 0, W, H, 14, Gfx.alpha(th.bg, fade * 0.94f));
+        Random mesh = new Random(73021L);
+        final int cols = 6, rows = 5;
+        float[][] px = new float[cols + 1][rows + 1];
+        float[][] py = new float[cols + 1][rows + 1];
+        for (int x = 0; x <= cols; x++) {
+            for (int y = 0; y <= rows; y++) {
+                float jx = (x == 0 || x == cols) ? 0 : (mesh.nextFloat() - 0.5f) * 24f;
+                float jy = (y == 0 || y == rows) ? 0 : (mesh.nextFloat() - 0.5f) * 20f;
+                px[x][y] = x * (W / (float) cols) + jx;
+                py[x][y] = y * (H / (float) rows) + jy;
             }
         }
 
-        // Kanciaste odłamki odchodzą od miejsca uderzenia w końcowej fazie.
-        float shardT = Math.max(0f, (t - 0.28f) / 0.72f);
-        for (int i = 0; i < 22; i++) {
-            Random rn = new Random(991L + i * 73L);
-            float sx = 18 + rn.nextFloat() * (W - 36);
-            float sy = 14 + rn.nextFloat() * (H - 28);
-            float dx = sx - cx, dy = sy - cy;
-            float len = (float) Math.max(1.0, Math.hypot(dx, dy));
-            float x = sx + dx / len * (18f + rn.nextFloat() * 75f) * shardT;
-            float y = sy + dy / len * (18f + rn.nextFloat() * 75f) * shardT + 28f * shardT * shardT;
-            float w = 5f + rn.nextFloat() * 15f, h = 4f + rn.nextFloat() * 12f;
-            int col = Gfx.alpha(i % 2 == 0 ? 0x99DDE7F5 : 0x668EA7C5, fade * 0.75f);
-            line(x, y, x + w, y + h * 0.35f, 0.8f, col);
-            line(x + w, y + h * 0.35f, x + w * 0.45f, y + h, 0.8f, col);
-            line(x + w * 0.45f, y + h, x, y, 0.8f, col);
+        float breakT = clamp((t - 0.08f) / 0.92f);
+        float spread = breakT * 74f;
+        float rotation = breakT * 0.24f;
+        for (int x = 0; x < cols; x++) {
+            for (int y = 0; y < rows; y++) {
+                float[][] tri = {
+                    {px[x][y], py[x][y], px[x + 1][y], py[x + 1][y], px[x + 1][y + 1], py[x + 1][y + 1]},
+                    {px[x][y], py[x][y], px[x + 1][y + 1], py[x + 1][y + 1], px[x][y + 1], py[x][y + 1]}
+                };
+                for (int k = 0; k < 2; k++) {
+                    float[] v = tri[k];
+                    float mx = (v[0] + v[2] + v[4]) / 3f, my = (v[1] + v[3] + v[5]) / 3f;
+                    float dx = mx - cx, dy = my - cy;
+                    float len = Math.max(1f, (float) Math.hypot(dx, dy));
+                    float push = spread * (0.35f + len / 210f);
+                    float ox = dx / len * push, oy = dy / len * push + breakT * breakT * 24f;
+                    float angle = rotation * ((x + y + k) % 2 == 0 ? 1f : -1f);
+                    float cos = (float) Math.cos(angle), sin = (float) Math.sin(angle);
+                    float[] tx = new float[3], ty = new float[3];
+                    for (int n = 0; n < 3; n++) {
+                        float rx = v[n * 2] - mx, ry = v[n * 2 + 1] - my;
+                        tx[n] = mx + rx * cos - ry * sin + ox;
+                        ty[n] = my + rx * sin + ry * cos + oy;
+                    }
+                    int base = (x * 17 + y * 29 + k * 11) % 3;
+                    int glass = base == 0 ? 0xAAB9D0E8 : base == 1 ? 0x887F9DBD : 0x997F8FA8;
+                    shardTriangle(tx[0], ty[0], tx[1], ty[1], tx[2], ty[2], Gfx.alpha(glass, fade));
+                    line(tx[0], ty[0], tx[1], ty[1], 0.8f, Gfx.alpha(0xFFEAF5FF, fade * 0.8f));
+                    line(tx[1], ty[1], tx[2], ty[2], 0.55f, Gfx.alpha(0xFFB9D5EF, fade * 0.65f));
+                }
+            }
+        }
+
+        // Jasne, rozchodzące się szczeliny podkreślają rozpad całego panelu.
+        int crack = Gfx.alpha(0xFFEAF5FF, fade * 0.9f);
+        for (int i = 0; i <= cols; i++) {
+            for (int j = 0; j < rows; j++) {
+                if (i > 0 && i < cols) line(px[i][j], py[i][j], px[i][j + 1], py[i][j + 1], 1.15f, crack);
+            }
+        }
+        for (int j = 0; j <= rows; j++) {
+            for (int i = 0; i < cols; i++) {
+                if (j > 0 && j < rows) line(px[i][j], py[i][j], px[i + 1][j], py[i + 1][j], 1.15f, crack);
+            }
         }
         A = saved;
     }
