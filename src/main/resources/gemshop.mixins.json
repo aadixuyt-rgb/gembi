@@ -3,9 +3,7 @@
   "package": "pl.gemshop.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "EntityMixin",
-    "LivingEntityRendererMixin",
-    "ClientPlayerInteractionManagerMixin"
+    "EntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
