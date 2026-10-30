@@ -156,11 +156,6 @@ public final class Esp {
             }
         }
 
-        Screen cur = mc.currentScreen;
-        boolean skip = cur instanceof GemShopScreen gs && gs.tab == 1;
-        if (Mark.cooldownActive() && !skip) {
-            drawHud(g, mc, Mark.id, Mark.name, Math.max(0L, Mark.end - System.currentTimeMillis()), 1f);
-        }
     }
 
     private static void clipLine(DrawContext g, Vector4f a, Vector4f b, int sw, int sh, float w, int col) {
