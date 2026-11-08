@@ -124,11 +124,12 @@ public final class BombDecoy {
             return false;
         }
 
-        // Stałe obrażenia lokalnej kopii: 4 punkty HP = 2 pełne serca.
-        // Nie zależą od cooldownu, krytyka ani wyposażenia.
-        float damage = 4.0f;
+        // Wyłącznie lokalny podgląd: suwak podaje serca, Minecraft HP.
+        float damage = Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
         float previousHealth = decoy.getHealth();
         decoy.setHealth(Math.max(0.0f, previousHealth - damage));
+        // Status 2 uruchamia standardowy czerwony hurt flash i dźwięk encji.
+        decoy.handleStatus((byte) 2);
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
