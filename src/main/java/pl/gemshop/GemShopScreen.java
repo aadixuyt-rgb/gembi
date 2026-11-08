@@ -741,7 +741,8 @@ public class GemShopScreen extends Screen {
     }
 
     private void drawFeatureSlider(float x, float y, float w, float value, int which) {
-        float t = (value - 1f) / ((which == 5 || which == 7) ? 99f : 9f);
+        float t = which == 8 ? (value - 0.5f) / 9.5f
+                : (value - 1f) / ((which == 5 || which == 7) ? 99f : 9f);
         rr(x, y, w, 3, 1.5f, th.track);
         rr(x, y, w * t, 3, 1.5f, accent);
         circle(x + w * t, y + 1.5f, 3, 0xFFFFFFFF);
@@ -754,7 +755,10 @@ public class GemShopScreen extends Screen {
     }
 
     private void setFeatureSlider(int which, float mouseX, float x, float w) {
-        if (which == 7) {
+        if (which == 8) {
+            float value = Math.max(0.5f, Math.min(10.0f, 0.5f + (mouseX - x) / w * 9.5f));
+            cfg.previewDamageHearts = Math.round(value * 2.0f) / 2.0f;
+        } else if (which == 7) {
             cfg.guiOpacity = Math.max(1, Math.min(100, Math.round(1f + (mouseX - x) / w * 99f)));
         } else if (which == 5) {
             cfg.freeCamSpeed = Math.max(1f, Math.min(100f, Math.round(1f + (mouseX - x) / w * 99f)));
@@ -855,6 +859,14 @@ public class GemShopScreen extends Screen {
         hit(lbx, ky + 24, lbw, 14, () -> listen = look);
         rr(lbx, ky + 24, lbw, 14, 5, listen == look ? Gfx.alpha(accent, 0.3f) : th.track);
         ctext(ln, lbx + lbw / 2f, ky + 27.5f, listen == look ? accent : th.text, 0.75f, true);
+
+        float damageY = ky + 56;
+        card(12, damageY, W - 24, 52);
+        title("Wizualna utrata serc", 12, damageY);
+        text(String.format(Locale.ROOT, "%.1f serca  ·  %.0f HP",
+                cfg.previewDamageHearts, cfg.previewDamageHearts * 2.0f),
+                22, damageY + 28, th.sub, 0.72f, true);
+        drawFeatureSlider(22, damageY + 43, W - 44, cfg.previewDamageHearts, 8);
 
         endScissor();
     }
