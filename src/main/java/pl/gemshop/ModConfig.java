@@ -62,6 +62,8 @@ public class ModConfig {
     public boolean fakePlayerPreviewEnabled = false;
     public float freeCamSpeed = 5.0f;
     public int guiOpacity = 85;
+    // Tylko wizualny podglad: ile serc pokazywac jako utracone na trafienie.
+    public float previewDamageHearts = 1.0f;
 
     public static ModConfig load() {
         try {
