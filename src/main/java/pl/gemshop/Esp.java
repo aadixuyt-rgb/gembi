@@ -184,21 +184,60 @@ public final class Esp {
         }
     }
 
+    /**
+     * Local-only toast styled after the server's screenshot: a large yellow-to-red
+     * Minecraft title and a smaller red/white/gold stat row. No fabricated server
+     * reward, ranking change, or "copy defeated" subtitle is shown.
+     */
     private static void drawCopyDefeatNotice(DrawContext g, MinecraftClient mc, String name) {
         int sw = mc.getWindow().getScaledWidth();
-        int y = Math.max(32, mc.getWindow().getScaledHeight() / 2 - 84);
-        int width = Math.min(sw - 24, 300);
-        int x = (sw - width) / 2;
-        Gfx.rr(g, x, y, width, 48, 8, 0xD90B0C12);
-        Gfx.outlineRR(g, x, y, width, 48, 8, 0xFFFFA12E);
+        int sh = mc.getWindow().getScaledHeight();
+
         String title = "ZABÓJSTWO";
-        String subtitle = "Kopia " + mc.textRenderer.trimToWidth(name, 140) + " pokonana";
-        Gfx.text(g, mc.textRenderer, title,
-                sw / 2f - Gfx.width(mc.textRenderer, title, true) * 0.95f / 2f,
-                y + 7, 0xFFFFB52E, 0.95f, true);
-        Gfx.text(g, mc.textRenderer, subtitle,
-                sw / 2f - Gfx.width(mc.textRenderer, subtitle, true) * 0.68f / 2f,
-                y + 29, 0xFFFFFFFF, 0.68f, true);
+        float titleScale = Math.min(4.35f,
+                (sw * 0.78f) / Math.max(1.0f, Gfx.width(mc.textRenderer, title, true)));
+        float titleY = sh * 0.405f;
+        drawGradientTitle(g, mc, title, sw / 2.0f, titleY, titleScale);
+
+        String safeName = mc.textRenderer.trimToWidth(name == null ? "" : name, Math.max(24, sw / 3));
+        String separator = "  |  ";
+        String hp = "0 HP";
+        float lineScale = Math.min(2.25f,
+                (sw * 0.88f) / Math.max(1.0f,
+                        Gfx.width(mc.textRenderer, safeName + separator + hp, true)));
+        float totalWidth = (Gfx.width(mc.textRenderer, safeName, true)
+                + Gfx.width(mc.textRenderer, separator, true)
+                + Gfx.width(mc.textRenderer, hp, true)) * lineScale;
+        float x = (sw - totalWidth) / 2.0f;
+        float lineY = sh * 0.535f;
+
+        Gfx.text(g, mc.textRenderer, safeName, x, lineY, 0xFFFF3434, lineScale, true);
+        x += Gfx.width(mc.textRenderer, safeName, true) * lineScale;
+        Gfx.text(g, mc.textRenderer, separator, x, lineY, 0xFFFFFFFF, lineScale, true);
+        x += Gfx.width(mc.textRenderer, separator, true) * lineScale;
+        Gfx.text(g, mc.textRenderer, hp, x, lineY, 0xFFFFD22E, lineScale, true);
+    }
+
+    private static void drawGradientTitle(DrawContext g, MinecraftClient mc, String text,
+                                          float centerX, float y, float scale) {
+        float totalWidth = Gfx.width(mc.textRenderer, text, true) * scale;
+        float x = centerX - totalWidth / 2.0f;
+        int[] stops = {0xFFFFD52E, 0xFFFF9D20, 0xFFFF5B1C, 0xFFFF252C};
+
+        for (int i = 0; i < text.length(); i++) {
+            String glyph = text.substring(i, i + 1);
+            float t = text.length() <= 1 ? 0.0f : (float) i / (text.length() - 1);
+            float scaled = t * (stops.length - 1);
+            int index = Math.min(stops.length - 2, (int) scaled);
+            int color = Gfx.mix(stops[index], stops[index + 1], scaled - index);
+            float width = Gfx.width(mc.textRenderer, glyph, true) * scale;
+
+            // Small dark offset gives the same chunky, raised Minecraft-title look.
+            Gfx.text(g, mc.textRenderer, glyph, x + 2.0f, y + 2.0f,
+                    0xB9000000, scale, true);
+            Gfx.text(g, mc.textRenderer, glyph, x, y, color, scale, true);
+            x += width;
+        }
     }
 
     private static void clipLine(DrawContext g, Vector4f a, Vector4f b, int sw, int sh, float w, int col) {
