@@ -81,10 +81,7 @@ public final class BombHearts {
         int healthIcons = (int) Math.ceil(Math.max(0.0f, decoy.getHealth()) / 2.0f);
         int absorptionIcons = (int) Math.ceil(Math.max(0.0f, decoy.getAbsorptionAmount()) / 2.0f);
         int total = healthIcons + absorptionIcons;
-        int perRow = Math.min(10, Math.max(1, total));
         int rows = Math.max(1, (total + 9) / 10);
-        int heartWidth = perRow * 9;
-        int startX = sx - heartWidth / 2;
         int yTop = sy - rows * 10 - 3;
 
         for (int i = 0; i < total; i++) {
@@ -120,11 +117,7 @@ public final class BombHearts {
             int color = (alpha << 24) | 0x00FF435E;
             int px = sx + Math.round(heart.offsetX() + (float) Math.sin(age * 0.012 + heart.offsetX()) * 3.0f);
             int py = sy - 5 + Math.round(heart.offsetY() + age * 0.035f);
-            ctx.getMatrices().push();
-            ctx.getMatrices().translate(px, py, 0);
-            ctx.getMatrices().scale(0.75f, 0.75f, 1.0f);
-            ctx.drawGuiTexture(RenderLayer::getGuiTextured, FULL, -4, -4, 9, 9);
-            ctx.getMatrices().pop();
+            Gfx.text(ctx, mc.textRenderer, "♥", px - 4, py - 4, color, 0.85f, true);
         }
     }
 }
