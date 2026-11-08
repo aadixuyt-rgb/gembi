@@ -2,17 +2,13 @@
   "schemaVersion": 1,
   "id": "gemshop",
   "version": "${version}",
-  "name": "Gem Shop",
-  "description": "Gem Shop GUI: lista graczy, ESP, tracer i cooldown.",
-  "authors": ["you"],
+  "name": "GemShop + AdixFX",
+  "description": "GemShop z pełnym pakietem AdixFX: hitboxy, GUI, muzyka i efekty.",
+  "authors": ["aadixuyt-rgb", "Adixu_YT", "snupxb"],
   "license": "MIT",
   "environment": "client",
-  "entrypoints": {
-    "client": ["pl.gemshop.GemShopMod"]
-  },
-  "mixins": [
-    "gemshop.mixins.json"
-  ],
+  "entrypoints": { "client": ["pl.gemshop.GemShopMod"] },
+  "mixins": ["gemshop.mixins.json", "adixfx.mixins.json"],
   "depends": {
     "fabricloader": ">=0.16.10",
     "minecraft": "~1.21.4",

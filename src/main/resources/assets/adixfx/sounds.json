@@ -1,0 +1,26 @@
+{
+  "musor_drop": {
+    "sounds": [
+      {
+        "name": "adixfx:musor_drop",
+        "stream": true
+      }
+    ]
+  },
+  "zani_preparaty": {
+    "sounds": [
+      {
+        "name": "adixfx:zani_preparaty",
+        "stream": true
+      }
+    ]
+  },
+  "dark_triad": {
+    "sounds": [
+      {
+        "name": "adixfx:dark_triad",
+        "stream": true
+      }
+    ]
+  }
+}
