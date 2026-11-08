@@ -12,7 +12,7 @@ public abstract class BombHitboxMixin {
     @Inject(method = "canHit()Z", at = @At("HEAD"), cancellable = true)
     private void gembi$skipHiddenBombSource(CallbackInfoReturnable<Boolean> cir) {
         Entity entity = (Entity) (Object) this;
-        if (BombDecoy.shouldHide(entity) || BombDecoy.isDecoy(entity)) {
+        if (BombDecoy.shouldHide(entity)) {
             cir.setReturnValue(false);
         }
     }
