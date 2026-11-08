@@ -5,8 +5,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.UUID;
 
@@ -97,29 +95,6 @@ public final class BombDecoy {
 
     public static BombDecoyEntity getDecoy() {
         return decoy != null && !decoy.isRemoved() ? decoy : null;
-    }
-
-    /**
-     * Applies a cosmetic hit to the local copy after vanilla processes the
-     * click. The network packet contains the copy's client-only ID and cannot
-     * damage the real player on the server.
-     */
-    public static void applyLocalHit(PlayerEntity attacker, Entity target) {
-        if (!isDecoy(target) || attacker == null) return;
-
-        float cooldown = attacker.getAttackCooldownProgress(0.5f);
-        double attackAttribute = attacker.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
-        float damage = (float) (attackAttribute * (0.2f + cooldown * cooldown * 0.8f));
-        damage = Math.max(0.5f, damage);
-
-        decoy.setHealth(Math.max(0.0f, decoy.getHealth() - damage));
-        decoy.animateDamage(attacker.getYaw());
-
-        if (decoy.getHealth() <= 0.0f) {
-            removeDecoy();
-            // snapshotCreated stays true: the real player remains hidden locally
-            // until Mark's 60-second visual timer expires.
-        }
     }
 
     private static void removeDecoy() {
