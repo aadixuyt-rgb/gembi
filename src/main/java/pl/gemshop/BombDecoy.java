@@ -7,8 +7,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.sound.SoundCategory;
 
 import java.util.UUID;
 
@@ -147,24 +145,14 @@ public final class BombDecoy {
         float damage = Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
         float previousHealth = decoy.getHealth();
         decoy.setHealth(Math.max(0.0f, previousHealth - damage));
-        // Status 2 daje standardowy czerwony błysk obrażeń Minecrafta.
-        decoy.handleStatus((byte) 2);
-        // Explicitly refresh the client hurt timer so the decoy's render state
-        // receives the standard red damage tint even without a server status packet.
-        decoy.maxHurtTime = 10;
-        decoy.hurtTime = 10;
-        // The decoy exists only on the client. Play the vanilla player hurt sound
-        // directly through the client world; Entity.playSound is not reliable here.
+        // Use Minecraft's client-side damage hook for the normal player hurt response.
+        // This is local-only and does not send a damage packet to the server.
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world != null) {
-            client.world.playSound(
-                    null,
-                    decoy.getX(), decoy.getY(), decoy.getZ(),
-                    SoundEvents.ENTITY_PLAYER_HURT,
-                    SoundCategory.PLAYERS,
-                    1.0f, 1.0f
-            );
+            decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
         }
+        decoy.maxHurtTime = 10;
+        decoy.hurtTime = 10;
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
