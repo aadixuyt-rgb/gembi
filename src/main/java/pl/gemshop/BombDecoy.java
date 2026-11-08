@@ -7,6 +7,8 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 
 import java.util.UUID;
 
@@ -150,6 +152,25 @@ public final class BombDecoy {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world != null) {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
+
+            // Play the vanilla attack sound only for the local decoy copy.
+            boolean critical = attacker.fallDistance > 0.0F
+                    && !attacker.isOnGround()
+                    && !attacker.isClimbing()
+                    && !attacker.isTouchingWater()
+                    && !attacker.hasVehicle()
+                    && !attacker.isSprinting();
+            client.world.playSound(
+                    decoy,
+                    decoy.getX(),
+                    decoy.getY(),
+                    decoy.getZ(),
+                    critical ? SoundEvents.ENTITY_PLAYER_ATTACK_CRIT
+                            : SoundEvents.ENTITY_PLAYER_ATTACK_STRONG,
+                    SoundCategory.PLAYERS,
+                    1.0F,
+                    1.0F
+            );
         }
         decoy.maxHurtTime = 10;
         decoy.hurtTime = 10;
