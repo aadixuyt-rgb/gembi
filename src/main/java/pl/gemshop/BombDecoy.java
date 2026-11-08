@@ -7,7 +7,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.sound.SoundEvents;\nimport net.minecraft.sound.SoundCategory;
 
 import java.util.UUID;
 
@@ -133,7 +133,7 @@ public final class BombDecoy {
         decoy.handleStatus((byte) 2);
         // Status encji nie zawsze odtwarza dźwięk dla lokalnego OtherClientPlayerEntity,
         // dlatego hurt sound odtwarzamy jawnie tylko dla kopii.
-        decoy.playSound(SoundEvents.ENTITY_PLAYER_HURT, 1.0f, 1.0f);
+        MinecraftClient client = MinecraftClient.getInstance();\n        if (client.world != null) {\n            // Positional client-world playback with no excluded listener: audible locally\n            // even though this entity exists only on the client.\n            client.world.playSound(null, decoy.getX(), decoy.getY(), decoy.getZ(),\n                    SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1.0f, 1.0f);\n        }
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
