@@ -25,13 +25,18 @@ Java 21 + Gradle 8.12+:
 
 Albo po prostu wrzuc repo na GitHuba i uzyj workflow `build.yml` (Actions -> Artifacts).
 
-## Bomba — opóźnienie i ograniczenia klienta
+## Bomba — lokalny snapshot i ograniczenia klienta
 
-- Po naciśnięciu przycisku Bomba lokalny znacznik zaczyna się po 3 sekundach.
-- Sam licznik znacznika nadal trwa 60 sekund, więc HUD pokazuje 57 sekund przy aktywacji.
-- Obecny projekt jest modem klienckim. Nie może sam utworzyć serwerowej encji gracza, nadać jej serwerowego HP, przyjmować prawdziwych obrażeń, przyznać zabójstwa/rankingu ani wysłać autentycznego komunikatu serwera.
-- Przełącznik „Fake Player (wizualny)” jest obecnie tylko ustawieniem konfiguracyjnym; nie tworzy jeszcze kopii gracza.
-- Mod Heart Indicator odczytuje zdrowie bezpośrednio z encji gracza w świecie. Nie będzie automatycznie pokazywać zdrowia osobnego, lokalnego hologramu bez osobnej integracji.
-- Lokalna zmiana widoczności lub ghost-blocków nie zmienia świata serwera i nie może zagwarantować identycznego zachowania dla innych graczy.
+- Po kliknięciu Bomba lokalny znacznik aktywuje się po 3 sekundach.
+- Timer znacznika nadal trwa 60 sekund, więc w chwili aktywacji HUD pokazuje 57 sekund.
+- Po aktywacji mod tworzy lokalny snapshot gracza, jeśli jego encja jest załadowana w świecie klienta.
+- Snapshot kopiuje skin, pozycję, rotację, nazwę wyświetlaną, ekwipunek, maksymalne i aktualne HP oraz absorpcję. Jeśli cel był w powietrzu, kopia zostaje w miejscu zapisania.
+- Oryginalny model i hitbox oznaczonego gracza są ukrywane tylko na tym kliencie do końca efektu. ESP i tracer kierują się na snapshot.
+- Snapshot jest wyłącznie wizualny, nie jest interaktywnym celem i nie przyjmuje ataków. Wyświetlane HP jest migawką z chwili utworzenia kopii.
 
-Do funkcji serwerowych wymagany jest zgodny plugin/mod po stronie serwera, który kontroluje encję, obrażenia, widoczność i zdarzenia zabójstw.
+## Ograniczenia serwera i integracje
+
+- Snapshot istnieje wyłącznie w lokalnym świecie klienta. Serwer go nie widzi, więc nie może przyznać za niego zabójstwa ani punktów rankingu.
+- Heart Indicator powinien móc odczytać migawkę podczas patrzenia na nią, ponieważ snapshot jest lokalną encją typu PlayerEntity z własnym ID i HP. Nie będzie jednak aktualizacji HP po atakach; wspólne działanie obu modów wymaga jeszcze testu w grze.
+- Klient nie dostaje informacji, który gracz postawił lub zniszczył dany blok. Ghost-blocków przypisanych do działań konkretnego gracza nie da się wiarygodnie zrobić wyłącznie po stronie klienta; wymaga to pluginu/moda serwerowego.
+- Komunikaty o zabójstwach i ranking są obliczane przez serwer. Gem Shop nie generuje fałszywych zdarzeń serwerowych ani prawdziwych punktów rankingu.
