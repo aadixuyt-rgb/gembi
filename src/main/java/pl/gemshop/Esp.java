@@ -33,6 +33,22 @@ public final class Esp {
 
     private Esp() {}
 
+    public static boolean isProjectionValid() {
+        return valid;
+    }
+
+    public static Matrix4f viewProjection() {
+        return new Matrix4f(VP);
+    }
+
+    public static Vec3d cameraPosition() {
+        return cam;
+    }
+
+    public static float partialTick() {
+        return partial;
+    }
+
     public static void capture(WorldRenderContext ctx) {
         Camera c = ctx.camera();
         cam = c.getPos();
@@ -154,6 +170,35 @@ public final class Esp {
             }
         }
 
+        // The three-second internal delay is intentionally never rendered.
+        // Once the copy appears, the visible timer starts at 0:57.
+        if (Mark.active()) {
+            drawHud(g, mc, Mark.id, Mark.name == null ? "Gracz" : Mark.name,
+                    Mark.remaining(), 1.0f);
+        }
+
+        // These hearts are drawn only for the local Bomb snapshot.
+        BombHearts.render(g);
+        if (BombDecoy.noticeActive()) {
+            drawCopyDefeatNotice(g, mc, BombDecoy.noticeName());
+        }
+    }
+
+    private static void drawCopyDefeatNotice(DrawContext g, MinecraftClient mc, String name) {
+        int sw = mc.getWindow().getScaledWidth();
+        int y = Math.max(32, mc.getWindow().getScaledHeight() / 2 - 84);
+        int width = Math.min(sw - 24, 300);
+        int x = (sw - width) / 2;
+        Gfx.rr(g, x, y, width, 48, 8, 0xD90B0C12);
+        Gfx.outlineRR(g, x, y, width, 48, 8, 0xFFFFA12E);
+        String title = "ZABÓJSTWO";
+        String subtitle = "Kopia " + mc.textRenderer.trimToWidth(name, 140) + " pokonana";
+        Gfx.text(g, mc.textRenderer, title,
+                sw / 2f - Gfx.width(mc.textRenderer, title, true) * 0.95f / 2f,
+                y + 7, 0xFFFFB52E, 0.95f, true);
+        Gfx.text(g, mc.textRenderer, subtitle,
+                sw / 2f - Gfx.width(mc.textRenderer, subtitle, true) * 0.68f / 2f,
+                y + 29, 0xFFFFFFFF, 0.68f, true);
     }
 
     private static void clipLine(DrawContext g, Vector4f a, Vector4f b, int sw, int sh, float w, int col) {
