@@ -269,7 +269,9 @@ public final class Esp {
         Gfx.text(g, mc.textRenderer, playerName, x + 4, y + 2, 0xFFFFFFFF, scale, true);
 
         float maxHealth = Math.max(1.0f, p.getMaxHealth());
-        float health = MathHelper.clamp(p.getHealth(), 0.0f, maxHealth);
+        float displayedHealth = BombDecoy.isDecoy(p)
+                ? BombHearts.visualHealth((BombDecoyEntity) p) : p.getHealth();
+        float health = MathHelper.clamp(displayedHealth, 0.0f, maxHealth);
         String healthText = Math.round(health) + "/" + Math.round(maxHealth);
         Gfx.text(g, mc.textRenderer, healthText, x + 4, y + Math.max(10, lh - 14), 0xFFFF6678, scale, true);
 
