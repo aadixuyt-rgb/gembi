@@ -5,15 +5,14 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.UUID;
 
 /**
- * Manages a local-only frozen copy for the Bomb visual.
- *
- * This copy exists only in the local ClientWorld. The server does not know it
- * exists, so hitting it changes only its local health and never grants a kill,
- * ranking, or server-side reward.
+ * Manages a local-only frozen player snapshot for the Bomb visual.
+ * The snapshot is client-side only and never sends attack packets to the server.
  */
 public final class BombDecoy {
     private static final int FIRST_LOCAL_ENTITY_ID = -1_000_000_000;
@@ -23,6 +22,8 @@ public final class BombDecoy {
     private static ClientWorld ownerWorld;
     private static BombDecoyEntity decoy;
     private static boolean snapshotCreated;
+    private static String defeatedName;
+    private static long noticeUntil;
 
     private BombDecoy() {}
 
@@ -31,6 +32,9 @@ public final class BombDecoy {
         sourceUuid = null;
         ownerWorld = null;
         snapshotCreated = false;
+        defeatedName = null;
+        noticeUntil = 0L;
+        BombHearts.reset();
     }
 
     public static void tick() {
@@ -52,10 +56,14 @@ public final class BombDecoy {
             removeDecoy();
             ownerWorld = null;
             snapshotCreated = false;
+            BombHearts.reset();
         }
 
-        // Mark.active() becomes true after the configured three-second delay.
-        if (!Mark.active() || snapshotCreated) return;
+        // The internal 3-second delay is not shown. The public HUD begins at 0:57.
+        if (!Mark.active() || snapshotCreated) {
+            BombHearts.tick(decoy);
+            return;
+        }
 
         for (AbstractClientPlayerEntity player : client.world.getPlayers()) {
             if (player.getUuid().equals(sourceUuid)) {
@@ -63,6 +71,7 @@ public final class BombDecoy {
                 break;
             }
         }
+        BombHearts.tick(decoy);
     }
 
     private static void spawnSnapshot(ClientWorld world, AbstractClientPlayerEntity source) {
@@ -70,12 +79,16 @@ public final class BombDecoy {
         GameProfile localProfile = new GameProfile(UUID.randomUUID(), sourceProfile.getName());
 
         BombDecoyEntity copy = new BombDecoyEntity(world, localProfile, source);
-        copy.setId(nextLocalEntityId++);
+        copy.setId(nextLocalEntityId--);
         world.addEntity(copy);
 
         ownerWorld = world;
         decoy = copy;
         snapshotCreated = true;
+        defeatedName = null;
+        noticeUntil = 0L;
+        BombHearts.reset();
+        BombHearts.tick(copy);
     }
 
     public static boolean shouldHide(AbstractClientPlayerEntity player) {
@@ -95,6 +108,54 @@ public final class BombDecoy {
 
     public static BombDecoyEntity getDecoy() {
         return decoy != null && !decoy.isRemoved() ? decoy : null;
+    }
+
+    /**
+     * Consumes a local attack on the visual copy and applies client-side HP
+     * loss. Returning true tells the mixin to cancel vanilla's network packet.
+     */
+    public static boolean attack(PlayerEntity attacker, Entity target) {
+        if (!isDecoy(target) || attacker == null
+                || attacker != MinecraftClient.getInstance().player) {
+            return false;
+        }
+
+        float cooldown = attacker.getAttackCooldownProgress(0.5f);
+        float damage = (float) attacker.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
+        damage *= 0.2f + cooldown * cooldown * 0.8f;
+
+        // Match the basic Minecraft critical-hit multiplier for a falling strike.
+        if (attacker.fallDistance > 0.0f && !attacker.isOnGround()
+                && !attacker.isClimbing() && !attacker.isTouchingWater()
+                && !attacker.hasVehicle()) {
+            damage *= 1.5f;
+        }
+
+        damage = Math.max(0.5f, damage);
+        float previousHealth = decoy.getHealth();
+        decoy.setHealth(Math.max(0.0f, previousHealth - damage));
+        BombHearts.onDamage(decoy, previousHealth);
+
+        if (decoy.getHealth() <= 0.0f) {
+            defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
+            noticeUntil = System.currentTimeMillis() + 2_000L;
+            removeDecoy();
+            // Keep the real player's model hidden until the original Bomb timer expires.
+        }
+
+        return true;
+    }
+
+    public static boolean noticeActive() {
+        return defeatedName != null && System.currentTimeMillis() < noticeUntil;
+    }
+
+    public static String noticeName() {
+        return defeatedName == null ? "" : defeatedName;
+    }
+
+    public static long noticeRemaining() {
+        return Math.max(0L, noticeUntil - System.currentTimeMillis());
     }
 
     private static void removeDecoy() {
