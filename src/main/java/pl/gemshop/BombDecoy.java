@@ -79,6 +79,10 @@ public final class BombDecoy {
         GameProfile localProfile = new GameProfile(UUID.randomUUID(), sourceProfile.getName());
 
         BombDecoyEntity copy = new BombDecoyEntity(world, localProfile, source);
+        String decoratedName = source.getDisplayName().getString();
+        if (decoratedName != null && !decoratedName.isBlank()) {
+            Mark.name = decoratedName;
+        }
         copy.setId(nextLocalEntityId--);
         world.addEntity(copy);
 
