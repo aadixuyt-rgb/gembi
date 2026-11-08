@@ -98,13 +98,14 @@ public final class Esp {
         ModConfig cfg = GemShopMod.cfg;
         int sw = mc.getWindow().getScaledWidth(), sh = mc.getWindow().getScaledHeight();
 
-        if (valid && (cfg.esp || Mark.active())) {
+        boolean bombRunning = Mark.id != null && System.currentTimeMillis() < Mark.end;
+        if (valid && (cfg.esp || bombRunning)) {
             AbstractClientPlayerEntity looked = lookedAt(partial);
             Vector4f[] c = new Vector4f[8];
             for (int i = 0; i < 8; i++) c[i] = new Vector4f();
             for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
                 if (p == mc.player || p.isSpectator() || BombDecoy.shouldHide(p)) continue;
-                boolean marked = Mark.active() && BombDecoy.isDecoy(p);
+                boolean marked = bombRunning && BombDecoy.isMarkedVisual(p);
                 boolean tracerTarget = cfg.tracerAll || marked;
                 if (!cfg.esp && !marked) continue;
 
@@ -170,9 +171,9 @@ public final class Esp {
             }
         }
 
-        // The three-second internal delay is intentionally never rendered.
-        // Once the copy appears, the visible timer starts at 0:57.
-        if (Mark.active()) {
+        // HUD and tracer start immediately when Bomb is clicked. The player copy
+        // and original-player hiding still wait for Mark.startAt (3 seconds).
+        if (bombRunning) {
             drawHud(g, mc, Mark.id, Mark.name == null ? "Gracz" : Mark.name,
                     Mark.remaining(), 1.0f);
         }
