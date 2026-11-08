@@ -153,9 +153,18 @@ public final class BombDecoy {
         // receives the standard red damage tint even without a server status packet.
         decoy.maxHurtTime = 10;
         decoy.hurtTime = 10;
-        // Play the vanilla player hurt sound once at normal volume and pitch.
-        // This is needed because the local-only decoy receives no server status packet.
-        decoy.playSound(SoundEvents.ENTITY_PLAYER_HURT, 1.0f, 1.0f);
+        // The decoy exists only on the client. Play the vanilla player hurt sound
+        // directly through the client world; Entity.playSound is not reliable here.
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.world != null) {
+            client.world.playSound(
+                    null,
+                    decoy.getX(), decoy.getY(), decoy.getZ(),
+                    SoundEvents.ENTITY_PLAYER_HURT,
+                    SoundCategory.PLAYERS,
+                    1.0f, 1.0f
+            );
+        }
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
