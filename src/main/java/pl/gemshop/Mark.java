@@ -34,6 +34,7 @@ public final class Mark {
     }
 
     public static void start(UUID i, String n) {
+        BombDecoy.reset();
         long now = System.currentTimeMillis();
         id = i;
         name = n;
