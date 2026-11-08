@@ -124,18 +124,9 @@ public final class BombDecoy {
             return false;
         }
 
-        float cooldown = attacker.getAttackCooldownProgress(0.5f);
-        float damage = (float) attacker.getAttributeValue(EntityAttributes.ATTACK_DAMAGE);
-        damage *= 0.2f + cooldown * cooldown * 0.8f;
-
-        // Match the basic Minecraft critical-hit multiplier for a falling strike.
-        if (attacker.fallDistance > 0.0f && !attacker.isOnGround()
-                && !attacker.isClimbing() && !attacker.isTouchingWater()
-                && !attacker.hasVehicle()) {
-            damage *= 1.5f;
-        }
-
-        damage = Math.max(0.5f, damage);
+        // Stałe obrażenia lokalnej kopii: 4 punkty HP = 2 pełne serca.
+        // Nie zależą od cooldownu, krytyka ani wyposażenia.
+        float damage = 4.0f;
         float previousHealth = decoy.getHealth();
         decoy.setHealth(Math.max(0.0f, previousHealth - damage));
         BombHearts.onDamage(decoy, previousHealth);
