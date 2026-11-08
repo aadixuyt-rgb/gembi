@@ -26,7 +26,8 @@ public final class Mark {
     }
 
     public static long remaining() {
-        return Math.max(0, end - Math.max(System.currentTimeMillis(), startAt));
+        // The visible HUD countdown begins at click time, including the 3-second setup delay.
+        return Math.max(0, end - System.currentTimeMillis());
     }
 
     public static long delayRemaining() {
