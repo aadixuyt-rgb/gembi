@@ -3,10 +3,13 @@ package pl.gemshop.mixin;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.Box;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import pl.gemshop.BombDecoy;
 import pl.gemshop.GemShopMod;
 import pl.gemshop.Mark;
 
@@ -37,6 +40,15 @@ public abstract class EntityMixin {
                 && other instanceof PlayerEntity
                 && (self == client.player || other == client.player)) {
             ci.cancel();
+        }
+    }
+
+    // AdixuFX draws its visual overlay from Entity#getBoundingBox().
+    // Return an empty box only for the hidden Bomb source, so no overlay is drawn.
+    @Inject(method = "getBoundingBox()Lnet/minecraft/util/math/Box;", at = @At("RETURN"), cancellable = true)
+    private void gemshop$hideBombSourceHitbox(CallbackInfoReturnable<Box> cir) {
+        if (BombDecoy.shouldHide((Entity) (Object) this)) {
+            cir.setReturnValue(Box.empty());
         }
     }
 }
