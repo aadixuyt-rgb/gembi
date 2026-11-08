@@ -8,8 +8,7 @@
     "BombHitboxMixin",
     "PlayerEntityRenderStateMixin",
     "PlayerEntityRendererMixin",
-    "LivingEntityRendererMixin",
-    "BombShadowMixin"
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
