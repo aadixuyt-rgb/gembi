@@ -24,3 +24,14 @@ Java 21 + Gradle 8.12+:
     gradle runClient    # test w grze
 
 Albo po prostu wrzuc repo na GitHuba i uzyj workflow `build.yml` (Actions -> Artifacts).
+
+## Bomba — opóźnienie i ograniczenia klienta
+
+- Po naciśnięciu przycisku Bomba lokalny znacznik zaczyna się po 3 sekundach.
+- Sam licznik znacznika nadal trwa 60 sekund, więc HUD pokazuje 57 sekund przy aktywacji.
+- Obecny projekt jest modem klienckim. Nie może sam utworzyć serwerowej encji gracza, nadać jej serwerowego HP, przyjmować prawdziwych obrażeń, przyznać zabójstwa/rankingu ani wysłać autentycznego komunikatu serwera.
+- Przełącznik „Fake Player (wizualny)” jest obecnie tylko ustawieniem konfiguracyjnym; nie tworzy jeszcze kopii gracza.
+- Mod Heart Indicator odczytuje zdrowie bezpośrednio z encji gracza w świecie. Nie będzie automatycznie pokazywać zdrowia osobnego, lokalnego hologramu bez osobnej integracji.
+- Lokalna zmiana widoczności lub ghost-blocków nie zmienia świata serwera i nie może zagwarantować identycznego zachowania dla innych graczy.
+
+Do funkcji serwerowych wymagany jest zgodny plugin/mod po stronie serwera, który kontroluje encję, obrażenia, widoczność i zdarzenia zabójstw.
