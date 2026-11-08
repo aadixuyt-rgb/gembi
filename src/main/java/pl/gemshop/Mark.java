@@ -4,7 +4,7 @@ import java.util.UUID;
 
 /** Local Bomb marker timer. Visual effects are handled by Esp. */
 public final class Mark {
-    public static final long DELAY = 2_000L;
+    public static final long DELAY = 3_000L;
     public static final long DURATION = 60_000L;
     public static UUID id;
     public static String name;
