@@ -7,6 +7,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.sound.SoundEvents;
 
 import java.util.UUID;
 
@@ -130,6 +131,9 @@ public final class BombDecoy {
         decoy.setHealth(Math.max(0.0f, previousHealth - damage));
         // Status 2 uruchamia standardowy czerwony hurt flash i dźwięk encji.
         decoy.handleStatus((byte) 2);
+        // Status encji nie zawsze odtwarza dźwięk dla lokalnego OtherClientPlayerEntity,
+        // dlatego hurt sound odtwarzamy jawnie tylko dla kopii.
+        decoy.playSound(SoundEvents.ENTITY_PLAYER_HURT, 1.0f, 1.0f);
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
