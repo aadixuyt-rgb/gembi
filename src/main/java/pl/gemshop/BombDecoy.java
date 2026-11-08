@@ -150,12 +150,16 @@ public final class BombDecoy {
         decoy.setHealth(Math.max(0.0f, previousHealth - damage));
         // Status 2 daje standardowy czerwony błysk obrażeń Minecrafta.
         decoy.handleStatus((byte) 2);
+        // Explicitly refresh the client hurt timer so the decoy's render state
+        // receives the standard red damage tint even without a server status packet.
+        decoy.maxHurtTime = 10;
+        decoy.hurtTime = 10;
         // Kopia jest lokalną encją, więc jej status nie gwarantuje odtworzenia dźwięku.
         // Odtwarzamy oryginalny hurt sound bezpośrednio przez SoundManager,
         // bez tłumienia zależnego od odległości od kopii.
         MinecraftClient client = MinecraftClient.getInstance();
         client.getSoundManager().play(
-                PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_HURT, 1.0f)
+                PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_HURT, 1.6f)
         );
         BombHearts.onDamage(decoy, previousHealth);
 
