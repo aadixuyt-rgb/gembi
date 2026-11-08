@@ -2,7 +2,6 @@ package pl.gemshop;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -154,8 +153,9 @@ public final class BombDecoy {
         // receives the standard red damage tint even without a server status packet.
         decoy.maxHurtTime = 10;
         decoy.hurtTime = 10;
-        // handleStatus(2) uses Minecraft's normal player hurt effect and sound.
-        // Do not add a second forced/master sound: it changes the mix and can sound wrong.
+        // Play the vanilla player hurt sound once at normal volume and pitch.
+        // This is needed because the local-only decoy receives no server status packet.
+        decoy.playSound(SoundEvents.ENTITY_PLAYER_HURT, 1.0f, 1.0f);
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
