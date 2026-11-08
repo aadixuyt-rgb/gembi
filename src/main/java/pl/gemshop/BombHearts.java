@@ -100,7 +100,8 @@ public final class BombHearts {
                 * mc.getWindow().getScaledHeight());
 
         float shownHealth = visualHealth(decoy);
-        int healthIcons = (int) Math.ceil(shownHealth / 2.0f);
+        // Puste kontenery pokazują pełne MAX_HEALTH kopii, a wypełnienie jej aktualne HP.
+        int healthIcons = (int) Math.ceil(Math.max(0.0f, decoy.getMaxHealth()) / 2.0f);
         int absorptionIcons = (int) Math.ceil(Math.max(0.0f, decoy.getAbsorptionAmount()) / 2.0f);
         int total = healthIcons + absorptionIcons;
         int rows = Math.max(1, (total + 9) / 10);
@@ -115,8 +116,11 @@ public final class BombHearts {
 
             if (i < healthIcons) {
                 float remaining = shownHealth - i * 2.0f;
-                ctx.drawGuiTexture(RenderLayer::getGuiTextured,
-                        remaining >= 2.0f ? FULL : HALF, x, y, 9, 9);
+                if (remaining >= 2.0f) {
+                    ctx.drawGuiTexture(RenderLayer::getGuiTextured, FULL, x, y, 9, 9);
+                } else if (remaining > 0.0f) {
+                    ctx.drawGuiTexture(RenderLayer::getGuiTextured, HALF, x, y, 9, 9);
+                }
             } else {
                 float remaining = decoy.getAbsorptionAmount() - (i - healthIcons) * 2.0f;
                 ctx.drawGuiTexture(RenderLayer::getGuiTextured,
