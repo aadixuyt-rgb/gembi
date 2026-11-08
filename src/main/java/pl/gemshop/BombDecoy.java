@@ -128,8 +128,18 @@ public final class BombDecoy {
      * loss. Returning true tells the mixin to cancel vanilla's network packet.
      */
     public static boolean attack(PlayerEntity attacker, Entity target) {
-        if (!isDecoy(target) || attacker == null
-                || attacker != MinecraftClient.getInstance().player) {
+        if (attacker == null || attacker != MinecraftClient.getInstance().player
+                || !Mark.active()) {
+            return false;
+        }
+
+        // If a client still reports the hidden source as the crosshair target,
+        // route that attack to the visible local snapshot instead.
+        Entity resolvedTarget = target;
+        if (shouldHide(target)) {
+            resolvedTarget = getDecoy();
+        }
+        if (!isDecoy(resolvedTarget)) {
             return false;
         }
 
