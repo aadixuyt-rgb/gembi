@@ -3,7 +3,12 @@
   "package": "pl.gemshop.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "EntityMixin"
+    "EntityMixin",
+    "BombAttackMixin",
+    "BombHitboxMixin",
+    "PlayerEntityRenderStateMixin",
+    "PlayerEntityRendererMixin",
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
