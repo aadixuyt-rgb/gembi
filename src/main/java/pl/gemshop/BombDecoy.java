@@ -154,13 +154,8 @@ public final class BombDecoy {
         // receives the standard red damage tint even without a server status packet.
         decoy.maxHurtTime = 10;
         decoy.hurtTime = 10;
-        // Kopia jest lokalną encją, więc jej status nie gwarantuje odtworzenia dźwięku.
-        // Odtwarzamy oryginalny hurt sound bezpośrednio przez SoundManager,
-        // bez tłumienia zależnego od odległości od kopii.
-        MinecraftClient client = MinecraftClient.getInstance();
-        client.getSoundManager().play(
-                PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_HURT, 1.6f)
-        );
+        // handleStatus(2) uses Minecraft's normal player hurt effect and sound.
+        // Do not add a second forced/master sound: it changes the mix and can sound wrong.
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
