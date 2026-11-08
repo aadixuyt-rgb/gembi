@@ -24,11 +24,28 @@ public final class BombHearts {
 
     private record FallingHeart(float offsetX, float offsetY, long startedAt) {}
     private static final List<FallingHeart> FALLING = new ArrayList<>();
+    private static BombDecoyEntity trackedDecoy;
+    private static float visualHealth;
 
     private BombHearts() {}
 
     public static void reset() {
         FALLING.clear();
+        trackedDecoy = null;
+        visualHealth = 0.0f;
+    }
+
+    private static void track(BombDecoyEntity decoy) {
+        if (decoy != null && trackedDecoy != decoy) {
+            trackedDecoy = decoy;
+            visualHealth = decoy.getHealth();
+        }
+    }
+
+    /** Health shown in the local visual label; never changes entity/server health. */
+    public static float visualHealth(BombDecoyEntity decoy) {
+        track(decoy);
+        return trackedDecoy == decoy ? Math.max(0.0f, visualHealth) : 0.0f;
     }
 
     public static void tick(BombDecoyEntity decoy) {
@@ -36,6 +53,7 @@ public final class BombHearts {
             FALLING.clear();
             return;
         }
+        track(decoy);
         long now = System.currentTimeMillis();
         Iterator<FallingHeart> it = FALLING.iterator();
         while (it.hasNext()) {
@@ -45,7 +63,10 @@ public final class BombHearts {
 
     public static void onDamage(BombDecoyEntity decoy, float previousHealth) {
         if (decoy == null) return;
-        float lost = Math.max(0.0f, previousHealth - decoy.getHealth());
+        track(decoy);
+        // This setting affects only the displayed hearts, not actual damage/health.
+        float lost = Math.max(0.5f, GemShopMod.cfg.previewDamageHearts) * 2.0f;
+        visualHealth = Math.max(0.0f, visualHealth - lost);
         int count = Math.min(8, Math.max(1, (int) Math.ceil(lost / 2.0f)));
         long now = System.currentTimeMillis();
         for (int i = 0; i < count; i++) {
@@ -78,7 +99,8 @@ public final class BombHearts {
         int sy = Math.round((1.0f - (projected.y / projected.w * 0.5f + 0.5f))
                 * mc.getWindow().getScaledHeight());
 
-        int healthIcons = (int) Math.ceil(Math.max(0.0f, decoy.getHealth()) / 2.0f);
+        float shownHealth = visualHealth(decoy);
+        int healthIcons = (int) Math.ceil(shownHealth / 2.0f);
         int absorptionIcons = (int) Math.ceil(Math.max(0.0f, decoy.getAbsorptionAmount()) / 2.0f);
         int total = healthIcons + absorptionIcons;
         int rows = Math.max(1, (total + 9) / 10);
@@ -92,7 +114,7 @@ public final class BombHearts {
             ctx.drawGuiTexture(RenderLayer::getGuiTextured, CONTAINER, x, y, 9, 9);
 
             if (i < healthIcons) {
-                float remaining = decoy.getHealth() - i * 2.0f;
+                float remaining = shownHealth - i * 2.0f;
                 ctx.drawGuiTexture(RenderLayer::getGuiTextured,
                         remaining >= 2.0f ? FULL : HALF, x, y, 9, 9);
             } else {
