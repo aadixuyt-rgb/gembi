@@ -2,6 +2,7 @@ package pl.gemshop;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -147,17 +148,15 @@ public final class BombDecoy {
         float damage = Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
         float previousHealth = decoy.getHealth();
         decoy.setHealth(Math.max(0.0f, previousHealth - damage));
-        // Status 2 uruchamia standardowy czerwony hurt flash i dźwięk encji.
+        // Status 2 daje standardowy czerwony błysk obrażeń Minecrafta.
         decoy.handleStatus((byte) 2);
-        // Status encji nie zawsze odtwarza dźwięk dla lokalnego OtherClientPlayerEntity,
-        // dlatego hurt sound odtwarzamy jawnie tylko dla kopii.
+        // Kopia jest lokalną encją, więc jej status nie gwarantuje odtworzenia dźwięku.
+        // Odtwarzamy oryginalny hurt sound bezpośrednio przez SoundManager,
+        // bez tłumienia zależnego od odległości od kopii.
         MinecraftClient client = MinecraftClient.getInstance();
-        if (client.world != null) {
-            // Positional client-world playback with no excluded listener: audible locally
-            // even though this entity exists only on the client.
-            client.world.playSound(null, decoy.getX(), decoy.getY(), decoy.getZ(),
-                    SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1.0f, 1.0f);
-        }
+        client.getSoundManager().play(
+                PositionedSoundInstance.master(SoundEvents.ENTITY_PLAYER_HURT, 1.0f)
+        );
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
