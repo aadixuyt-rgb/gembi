@@ -112,6 +112,13 @@ public final class BombDecoy {
         return decoy != null && entity == decoy && !decoy.isRemoved();
     }
 
+    /** The marked visual is the real player during the 3-second delay, then the local copy. */
+    public static boolean isMarkedVisual(AbstractClientPlayerEntity player) {
+        if (player == null) return false;
+        if (isDecoy(player)) return true;
+        return !snapshotCreated && sourceUuid != null && sourceUuid.equals(player.getUuid());
+    }
+
     public static BombDecoyEntity getDecoy() {
         return decoy != null && !decoy.isRemoved() ? decoy : null;
     }
