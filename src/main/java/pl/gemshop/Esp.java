@@ -38,7 +38,7 @@ public final class Esp {
         cam = c.getPos();
         Matrix4f view = new Matrix4f().rotation(c.getRotation().conjugate(new Quaternionf()));
         new Matrix4f(ctx.projectionMatrix()).mul(view, VP);
-        partial = MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(true);
+        partial = ctx.tickCounter().getTickDelta(false);
         valid = true;
     }
 
@@ -50,7 +50,7 @@ public final class Esp {
         AbstractClientPlayerEntity best = null;
         double bd = Double.MAX_VALUE;
         for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
-            if (p == mc.player || p.isSpectator()) continue;
+            if (p == mc.player || p.isSpectator() || BombDecoy.shouldHide(p)) continue;
             Optional<Vec3d> hit = p.getBoundingBox().expand(0.15).raycast(start, end);
             if (hit.isPresent()) {
                 double d = start.squaredDistanceTo(hit.get());
@@ -87,15 +87,13 @@ public final class Esp {
             Vector4f[] c = new Vector4f[8];
             for (int i = 0; i < 8; i++) c[i] = new Vector4f();
             for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
-                if (p == mc.player || p.isSpectator()) continue;
-                boolean marked = Mark.active() && p.getUuid().equals(Mark.id);
+                if (p == mc.player || p.isSpectator() || BombDecoy.shouldHide(p)) continue;
+                boolean marked = Mark.active() && BombDecoy.isDecoy(p);
                 boolean tracerTarget = cfg.tracerAll || marked;
                 if (!cfg.esp && !marked) continue;
 
-                double dx = MathHelper.lerp(partial, p.prevX, p.getX()) - p.getX();
-                double dy = MathHelper.lerp(partial, p.prevY, p.getY()) - p.getY();
-                double dz = MathHelper.lerp(partial, p.prevZ, p.getZ()) - p.getZ();
-                Box b = p.getBoundingBox().offset(dx, dy, dz);
+                Vec3d interpolated = p.getLerpedPos(partial);
+                Box b = p.getBoundingBox().offset(interpolated.subtract(p.getPos()));
                 if (cfg.hitboxEnabled) {
                     double cx = (b.minX + b.maxX) * 0.5;
                     double cz = (b.minZ + b.maxZ) * 0.5;
@@ -182,7 +180,8 @@ public final class Esp {
         Gfx.outlineRR(g, x, y, lw, lh, 4, 0xFFFF3B4E);
 
         float scale = Math.max(0.5f, Math.min(0.8f, lw / 150f * 0.85f));
-        String playerName = mc.textRenderer.trimToWidth(p.getNameForScoreboard(), Math.max(18, lw - 8));
+        String rawName = p.getCustomName() != null ? p.getCustomName().getString() : p.getNameForScoreboard();
+        String playerName = mc.textRenderer.trimToWidth(rawName, Math.max(18, lw - 8));
         Gfx.text(g, mc.textRenderer, playerName, x + 4, y + 2, 0xFFFFFFFF, scale, true);
 
         float maxHealth = Math.max(1.0f, p.getMaxHealth());
