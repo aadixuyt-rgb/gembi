@@ -4,11 +4,7 @@
   "package": "pl.adixfx.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
-  "client": [
-    "SoundManagerAccessor",
-    "SoundManagerResumeMixin",
-    "SoundSystemAccessor"
-  ],
+  "client": [],
   "injectors": { "defaultRequire": 1 },
   "refmap": "adixfx-refmap.json"
 }
