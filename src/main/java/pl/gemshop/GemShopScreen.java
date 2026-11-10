@@ -781,7 +781,7 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 520;
+        maxScroll[2] = Math.max(0, (hitboxExpanded ? 515 : 453) - H);
         scissor(0, 36, W, H - 44);
 
         float gap = 5, left = 12, cw = (W - 24 - gap * 2) / 3f;
