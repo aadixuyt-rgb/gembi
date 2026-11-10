@@ -64,6 +64,10 @@ public class ModConfig {
     public int guiOpacity = 85;
     // Tylko wizualny podglad: ile serc pokazywac jako utracone na trafienie.
     public float previewDamageHearts = 1.0f;
+    // 0 = klasyczna kopia, 1 = dwa lokalne teleporty podczas trybu Laging.
+    public int bombMode = 0;
+    // 0 = Survival, 1 = MineStar (lokalny podgląd nagród).
+    public int bombServer = 0;
 
     public static ModConfig load() {
         try {
