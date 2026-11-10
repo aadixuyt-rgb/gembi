@@ -43,11 +43,9 @@ public final class FakeMineStarInventory {
         add(rewards, Items.GOLDEN_APPLE, 64, 36);
         add(rewards, Items.RED_BANNER, 16, 7);
         add(rewards, Items.BLAZE_ROD, 13);
-        add(rewards, Items.IRON_AXE, 1);
         add(rewards, Items.SHEARS, 1);
         add(rewards, Items.COBWEB, 45);
         add(rewards, Items.ELYTRA, 1);
-        add(rewards, Items.NETHERITE_AXE, 1);
 
         PlayerInventory inventory = mc.player.getInventory();
         int rewardIndex = 0;
