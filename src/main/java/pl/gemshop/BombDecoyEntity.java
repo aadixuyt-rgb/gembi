@@ -112,9 +112,9 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
         setPosition(snapshotX, snapshotY, snapshotZ);
         setVelocity(Vec3d.ZERO);
         setVelocityClient(0.0, 0.0, 0.0);
-        setYaw(snapshotYaw);
-        setPitch(snapshotPitch);
-        setHeadYaw(snapshotHeadYaw);
+        setYaw(headTwitchActive ? visualYaw : snapshotYaw);
+        setPitch(headTwitchActive ? visualPitch : snapshotPitch);
+        setHeadYaw(headTwitchActive ? visualHeadYaw : snapshotHeadYaw);
         setBodyYaw(snapshotBodyYaw);
         setNoGravity(true);
     }
