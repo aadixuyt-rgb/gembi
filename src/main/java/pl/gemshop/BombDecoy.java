@@ -209,11 +209,14 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
+            // Play at the local listener with no excluded entity. Using the
+            // decoy as the excluded source can suppress the client-side preview
+            // on some client-world sound paths.
             client.world.playSound(
-                    decoy,
-                    decoy.getX(),
-                    decoy.getY(),
-                    decoy.getZ(),
+                    null,
+                    client.player.getX(),
+                    client.player.getY(),
+                    client.player.getZ(),
                     attackSound,
                     SoundCategory.PLAYERS,
                     1.0F,
