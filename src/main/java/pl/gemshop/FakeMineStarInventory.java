@@ -2,6 +2,7 @@ package pl.gemshop;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -65,7 +66,8 @@ public final class FakeMineStarInventory {
     public static ItemStack getFake(Slot slot) {
         if (!active || slot == null) return ItemStack.EMPTY;
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.player == null || slot.inventory != mc.player.getInventory()) return ItemStack.EMPTY;
+        if (mc.player == null || !(mc.currentScreen instanceof InventoryScreen)
+                || slot.inventory != mc.player.getInventory()) return ItemStack.EMPTY;
         return ITEMS.getOrDefault(slot.getIndex(), ItemStack.EMPTY);
     }
 
