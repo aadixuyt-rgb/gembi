@@ -18,7 +18,7 @@ public abstract class FakeMineStarInventoryMixin {
         FakeMineStarInventory.render(context, slot);
     }
 
-    @Inject(method = "onMouseClick", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
     private void gembi$dropFakeMineStarItem(Slot slot, int slotId, int button,
                                             SlotActionType actionType, CallbackInfo ci) {
         if (FakeMineStarInventory.handleClick(slot, actionType)) ci.cancel();
