@@ -21,6 +21,6 @@ public abstract class FakeMineStarInventoryMixin {
     @Inject(method = "onMouseClick", at = @At("HEAD"), cancellable = true)
     private void gembi$dropFakeMineStarItem(Slot slot, int slotId, int button,
                                             SlotActionType actionType, CallbackInfo ci) {
-        if (FakeMineStarInventory.consumeDrop(slot, actionType)) ci.cancel();
+        if (FakeMineStarInventory.handleClick(slot, actionType)) ci.cancel();
     }
 }
