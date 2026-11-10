@@ -9,6 +9,8 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.SwordItem;
 
 import java.util.UUID;
 
@@ -180,16 +182,20 @@ public final class BombDecoy {
 
             // Vanilla event groups let Minecraft select a random sound variant.
             float cooldown = attacker.getAttackCooldownProgress(0.5F);
-            boolean critical = attacker.fallDistance > 0.0F
+            boolean fullyCharged = cooldown > 0.9F;
+            boolean critical = fullyCharged && attacker.fallDistance > 0.0F
                     && !attacker.isOnGround() && !attacker.isClimbing()
                     && !attacker.isTouchingWater() && !attacker.hasVehicle()
+                    && !attacker.hasStatusEffect(StatusEffects.BLINDNESS)
                     && !attacker.isSprinting();
-            boolean sweeping = !critical && cooldown >= 0.9F && attacker.isOnGround()
-                    && !attacker.isSprinting();
+            boolean knockback = fullyCharged && attacker.isSprinting();
+            boolean sweeping = fullyCharged && !critical && !knockback
+                    && attacker.isOnGround() && !attacker.isSprinting()
+                    && attacker.getMainHandStack().getItem() instanceof SwordItem;
             var attackSound = critical ? SoundEvents.ENTITY_PLAYER_ATTACK_CRIT
-                    : attacker.isSprinting() ? SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK
+                    : knockback ? SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK
                     : sweeping ? SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP
-                    : cooldown >= 0.9F ? SoundEvents.ENTITY_PLAYER_ATTACK_STRONG
+                    : fullyCharged ? SoundEvents.ENTITY_PLAYER_ATTACK_STRONG
                     : SoundEvents.ENTITY_PLAYER_ATTACK_WEAK;
             client.world.playSound(decoy, decoy.getX(), decoy.getY(), decoy.getZ(),
                     attackSound, SoundCategory.PLAYERS, 1.0F, 1.0F);
