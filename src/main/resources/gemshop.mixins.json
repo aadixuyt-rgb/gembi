@@ -10,7 +10,8 @@
     "PlayerEntityRendererMixin",
     "LivingEntityRendererMixin",
     "BombShadowMixin",
-    "FakeMineStarInventoryMixin"
+    "FakeMineStarInventoryMixin",
+    "BombPlayerHurtModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1
