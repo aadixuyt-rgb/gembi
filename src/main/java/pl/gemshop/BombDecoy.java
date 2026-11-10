@@ -7,8 +7,10 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.random.Random;
 
 import java.util.UUID;
 
@@ -209,19 +211,18 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // Play at the local listener with no excluded entity. Using the
-            // decoy as the excluded source can suppress the client-side preview
-            // on some client-world sound paths.
-            client.world.playSound(
-                    null,
-                    client.player.getX(),
-                    client.player.getY(),
-                    client.player.getZ(),
+            // Submit the sound directly to the client SoundManager.
+            // This avoids relying on ClientWorld's entity/world sound routing.
+            client.getSoundManager().play(new PositionedSoundInstance(
                     attackSound,
                     SoundCategory.PLAYERS,
                     1.0F,
-                    1.0F
-            );
+                    1.0F,
+                    Random.create(),
+                    client.player.getX(),
+                    client.player.getY(),
+                    client.player.getZ()
+            ));
         }
         decoy.maxHurtTime = 10;
         decoy.hurtTime = 10;
