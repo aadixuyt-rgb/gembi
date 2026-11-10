@@ -188,7 +188,7 @@ public final class Esp {
     /**
      * Local-only toast styled after the server's screenshot: a large yellow-to-red
      * Minecraft title and a smaller red/white/gold stat row. No fabricated server
-     * reward, ranking change, or "copy defeated" subtitle is shown.
+     * Local score preview is randomized; it does not change server ranking.
      */
     private static void drawCopyDefeatNotice(DrawContext g, MinecraftClient mc, String name) {
         int sw = mc.getWindow().getScaledWidth();
@@ -202,7 +202,7 @@ public final class Esp {
 
         String safeName = mc.textRenderer.trimToWidth(name == null ? "" : name, Math.max(24, sw / 3));
         String separator = "  |  ";
-        String hp = "0 HP";
+        String hp = "0 HP  |  " + BombDecoy.noticeScore() + " pkt";
         float lineScale = Math.min(2.25f,
                 (sw * 0.88f) / Math.max(1.0f,
                         Gfx.width(mc.textRenderer, safeName + separator + hp, true)));
