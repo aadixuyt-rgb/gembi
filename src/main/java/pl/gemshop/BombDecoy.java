@@ -172,12 +172,13 @@ public final class BombDecoy {
         // Wyłącznie lokalny podgląd: suwak podaje serca, Minecraft HP.
         float damage = Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
         float previousHealth = decoy.getHealth();
-        decoy.setHealth(Math.max(0.0f, previousHealth - damage));
-        // Use Minecraft's client-side damage hook for the normal player hurt response.
-        // This is local-only and does not send a damage packet to the server.
+        float resultingHealth = Math.max(0.0f, previousHealth - damage);
+        // Trigger the normal local hurt response, then restore the exact preview
+        // health value so clientDamage cannot apply the configured damage twice.
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world != null) {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
+            decoy.setHealth(resultingHealth);
 
             boolean critical = attacker.fallDistance > 0.0F
                     && !attacker.isOnGround()
