@@ -49,10 +49,15 @@ public final class FakeMineStarInventory {
 
         PlayerInventory inventory = mc.player.getInventory();
         int rewardIndex = 0;
-        // Fill only empty player inventory slots; existing real items are untouched.
-        for (int i = 0; i < inventory.size() && rewardIndex < rewards.size(); i++) {
-            if (i < 0 || i > 35 || !inventory.getStack(i).isEmpty()) continue;
-            ITEMS.put(i, rewards.get(rewardIndex++));
+        // Inventory-screen order: main rows first (9-35), then the hotbar (0-8).
+        // Only empty slots are used; existing real items are never replaced.
+        for (int pass = 0; pass < 2 && rewardIndex < rewards.size(); pass++) {
+            int first = pass == 0 ? 9 : 0;
+            int last = pass == 0 ? 35 : 8;
+            for (int i = first; i <= last && rewardIndex < rewards.size(); i++) {
+                if (!inventory.getStack(i).isEmpty()) continue;
+                ITEMS.put(i, rewards.get(rewardIndex++));
+            }
         }
         active = !ITEMS.isEmpty();
     }
