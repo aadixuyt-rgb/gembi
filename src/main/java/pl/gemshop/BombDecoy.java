@@ -214,6 +214,11 @@ public final class BombDecoy {
 
     public static int noticeScore() { return localScore; }
 
+    public static float hurtAnimationProgress(AbstractClientPlayerEntity player) {
+        if (!isDecoy(player)) return 0.0f;
+        return Math.max(0.0f, Math.min(1.0f, player.hurtTime / 10.0f));
+    }
+
     public static boolean noticeActive() {
         return defeatedName != null && System.currentTimeMillis() < noticeUntil;
     }
