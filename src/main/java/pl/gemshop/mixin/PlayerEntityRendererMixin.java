@@ -20,6 +20,8 @@ public abstract class PlayerEntityRendererMixin {
                                             PlayerEntityRenderState state,
                                             float tickDelta,
                                             CallbackInfo ci) {
-        ((BombHideFlag) state).gembi$setBombHidden(BombDecoy.shouldHide(player));
+        BombHideFlag flag = (BombHideFlag) state;
+        flag.gembi$setBombHidden(BombDecoy.shouldHide(player));
+        flag.gembi$setBombHurtAnimation(BombDecoy.hurtAnimationProgress(player));
     }
 }
