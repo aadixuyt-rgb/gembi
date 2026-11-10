@@ -8,6 +8,7 @@ import pl.gemshop.BombHideFlag;
 @Mixin(PlayerEntityRenderState.class)
 public abstract class PlayerEntityRenderStateMixin implements BombHideFlag {
     @Unique private boolean gembi$bombHidden;
+    @Unique private float gembi$bombHurtAnimation;
 
     @Override
     public boolean gembi$isBombHidden() {
@@ -17,5 +18,13 @@ public abstract class PlayerEntityRenderStateMixin implements BombHideFlag {
     @Override
     public void gembi$setBombHidden(boolean hidden) {
         gembi$bombHidden = hidden;
+    }
+
+    @Override
+    public float gembi$getBombHurtAnimation() { return gembi$bombHurtAnimation; }
+
+    @Override
+    public void gembi$setBombHurtAnimation(float value) {
+        gembi$bombHurtAnimation = Math.max(0.0f, Math.min(1.0f, value));
     }
 }
