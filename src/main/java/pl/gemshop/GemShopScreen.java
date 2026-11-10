@@ -781,7 +781,7 @@ public class GemShopScreen extends Screen {
 
     private void drawSettings() {
         float top = 42 - scroll[2];
-        maxScroll[2] = 400;
+        maxScroll[2] = 520;
         scissor(0, 36, W, H - 44);
 
         float gap = 5, left = 12, cw = (W - 24 - gap * 2) / 3f;
@@ -867,6 +867,18 @@ public class GemShopScreen extends Screen {
                 cfg.previewDamageHearts, cfg.previewDamageHearts * 2.0f),
                 22, damageY + 28, th.sub, 0.72f, true);
         drawFeatureSlider(22, damageY + 43, W - 44, cfg.previewDamageHearts, 8);
+
+        float modeY = damageY + 58;
+        card(12, modeY, W - 24, 34);
+        text("Tryb kopii", 22, modeY + 12, th.text, 0.72f, true);
+        seg(W - 22 - 132, modeY + 8, new String[]{"Zwykły", "Laging"},
+                cfg.bombMode == 1 ? 1 : 0, 64, i -> { cfg.bombMode = i; cfg.save(); });
+
+        float serverY = modeY + 39;
+        card(12, serverY, W - 24, 34);
+        text("Serwer nagród", 22, serverY + 12, th.text, 0.72f, true);
+        seg(W - 22 - 132, serverY + 8, new String[]{"Survival", "MineStar"},
+                cfg.bombServer == 1 ? 1 : 0, 64, i -> { cfg.bombServer = i; cfg.save(); });
 
         endScissor();
     }
