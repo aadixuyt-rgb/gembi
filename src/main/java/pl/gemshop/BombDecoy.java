@@ -180,19 +180,41 @@ public final class BombDecoy {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
             decoy.setHealth(resultingHealth);
 
+            // Mirror the main vanilla player-attack sound families for the
+            // local preview: critical, sprint knockback, sword sweep, weak and strong.
+            float cooldown = attacker.getAttackCooldownProgress(0.5F);
             boolean critical = attacker.fallDistance > 0.0F
                     && !attacker.isOnGround()
                     && !attacker.isClimbing()
                     && !attacker.isTouchingWater()
                     && !attacker.hasVehicle()
                     && !attacker.isSprinting();
+            boolean sweeping = !critical
+                    && cooldown > 0.9F
+                    && attacker.isOnGround()
+                    && !attacker.isSprinting()
+                    && attacker.getMainHandStack().isIn(net.minecraft.registry.tag.ItemTags.SWORDS)
+                    && attacker.getVelocity().horizontalLengthSquared() < 0.1D;
+
+            net.minecraft.sound.SoundEvent attackSound;
+            if (critical) {
+                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_CRIT;
+            } else if (attacker.isSprinting()) {
+                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK;
+            } else if (sweeping) {
+                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP;
+            } else if (cooldown < 0.9F) {
+                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_WEAK;
+            } else {
+                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
+            }
+
             client.world.playSound(
                     decoy,
                     decoy.getX(),
                     decoy.getY(),
                     decoy.getZ(),
-                    critical ? SoundEvents.ENTITY_PLAYER_ATTACK_CRIT
-                            : SoundEvents.ENTITY_PLAYER_ATTACK_STRONG,
+                    attackSound,
                     SoundCategory.PLAYERS,
                     1.0F,
                     1.0F
