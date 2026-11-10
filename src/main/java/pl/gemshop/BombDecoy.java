@@ -26,6 +26,9 @@ public final class BombDecoy {
     private static boolean snapshotCreated;
     private static String defeatedName;
     private static long noticeUntil;
+    private static long spawnedAt;
+    private static int lagStage;
+    private static int localScore;
 
     private BombDecoy() {}
 
@@ -36,6 +39,9 @@ public final class BombDecoy {
         snapshotCreated = false;
         defeatedName = null;
         noticeUntil = 0L;
+        spawnedAt = 0L;
+        lagStage = 0;
+        localScore = 0;
         BombHearts.reset();
     }
 
@@ -62,18 +68,34 @@ public final class BombDecoy {
         }
 
         // The internal 3-second delay is not shown. The public HUD begins at 0:57.
-        if (!Mark.active() || snapshotCreated) {
+        if (!Mark.active()) return;
+        if (snapshotCreated) {
+            if (GemShopMod.cfg.bombMode == 1 && decoy != null && !decoy.isRemoved()) {
+                long age = System.currentTimeMillis() - spawnedAt;
+                AbstractClientPlayerEntity liveSource = findSource(client.world);
+                if (liveSource != null && age >= 1_000L && lagStage == 0) {
+                    decoy.freezeAt(liveSource);
+                    lagStage = 1;
+                } else if (liveSource != null && age >= 2_000L && lagStage == 1) {
+                    decoy.freezeAt(liveSource);
+                    lagStage = 2;
+                }
+                if (lagStage < 2) decoy.twitchHead(age);
+            }
             BombHearts.tick(decoy);
             return;
         }
 
-        for (AbstractClientPlayerEntity player : client.world.getPlayers()) {
-            if (player.getUuid().equals(sourceUuid)) {
-                spawnSnapshot(client.world, player);
-                break;
-            }
-        }
+        AbstractClientPlayerEntity source = findSource(client.world);
+        if (source != null) spawnSnapshot(client.world, source);
         BombHearts.tick(decoy);
+    }
+
+    private static AbstractClientPlayerEntity findSource(ClientWorld world) {
+        for (AbstractClientPlayerEntity player : world.getPlayers()) {
+            if (player.getUuid().equals(sourceUuid)) return player;
+        }
+        return null;
     }
 
     private static void spawnSnapshot(ClientWorld world, AbstractClientPlayerEntity source) {
@@ -93,6 +115,8 @@ public final class BombDecoy {
         snapshotCreated = true;
         defeatedName = null;
         noticeUntil = 0L;
+        spawnedAt = System.currentTimeMillis();
+        lagStage = 0;
         BombHearts.reset();
         BombHearts.tick(copy);
     }
@@ -153,24 +177,23 @@ public final class BombDecoy {
         if (client.world != null) {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
 
-            // Play the vanilla attack sound only for the local decoy copy.
+            // Vanilla event groups let Minecraft select a random sound variant.
+            float cooldown = attacker.getAttackCooldownProgress(0.5F);
             boolean critical = attacker.fallDistance > 0.0F
-                    && !attacker.isOnGround()
-                    && !attacker.isClimbing()
-                    && !attacker.isTouchingWater()
-                    && !attacker.hasVehicle()
+                    && !attacker.isOnGround() && !attacker.isClimbing()
+                    && !attacker.isTouchingWater() && !attacker.hasVehicle()
                     && !attacker.isSprinting();
-            client.world.playSound(
-                    decoy,
-                    decoy.getX(),
-                    decoy.getY(),
-                    decoy.getZ(),
-                    critical ? SoundEvents.ENTITY_PLAYER_ATTACK_CRIT
-                            : SoundEvents.ENTITY_PLAYER_ATTACK_STRONG,
-                    SoundCategory.PLAYERS,
-                    1.0F,
-                    1.0F
-            );
+            boolean sweeping = !critical && cooldown >= 0.9F && attacker.isOnGround()
+                    && !attacker.isSprinting();
+            var attackSound = critical ? SoundEvents.ENTITY_PLAYER_ATTACK_CRIT
+                    : attacker.isSprinting() ? SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK
+                    : sweeping ? SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP
+                    : cooldown >= 0.9F ? SoundEvents.ENTITY_PLAYER_ATTACK_STRONG
+                    : SoundEvents.ENTITY_PLAYER_ATTACK_WEAK;
+            client.world.playSound(decoy, decoy.getX(), decoy.getY(), decoy.getZ(),
+                    attackSound, SoundCategory.PLAYERS, 1.0F, 1.0F);
+            client.world.playSound(decoy, decoy.getX(), decoy.getY(), decoy.getZ(),
+                    SoundEvents.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1.0F, 1.0F);
         }
         decoy.maxHurtTime = 10;
         decoy.hurtTime = 10;
@@ -178,6 +201,7 @@ public final class BombDecoy {
 
         if (decoy.getHealth() <= 0.0f) {
             defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
+            localScore = 3 + (int) (Math.random() * 13);
             noticeUntil = System.currentTimeMillis() + 2_000L;
             removeDecoy();
             // Keep the real player's model hidden until the original Bomb timer expires.
@@ -185,6 +209,8 @@ public final class BombDecoy {
 
         return true;
     }
+
+    public static int noticeScore() { return localScore; }
 
     public static boolean noticeActive() {
         return defeatedName != null && System.currentTimeMillis() < noticeUntil;
