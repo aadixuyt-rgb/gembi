@@ -74,10 +74,17 @@ public final class FakeMineStarInventory {
         return ITEMS.getOrDefault(slot.getIndex(), ItemStack.EMPTY);
     }
 
-    public static boolean consumeDrop(Slot slot, SlotActionType actionType) {
-        if (slot == null || actionType != SlotActionType.THROW || getFake(slot).isEmpty()) return false;
-        ITEMS.remove(slot.getIndex());
-        if (ITEMS.isEmpty()) active = false;
+    /**
+     * Fake stacks are presentation-only: block every slot operation that could
+     * copy or move them into the real cursor, hotbar, or another inventory.
+     * THROW is the one supported action and removes the preview stack.
+     */
+    public static boolean handleClick(Slot slot, SlotActionType actionType) {
+        if (slot == null || getFake(slot).isEmpty()) return false;
+        if (actionType == SlotActionType.THROW) {
+            ITEMS.remove(slot.getIndex());
+            if (ITEMS.isEmpty()) active = false;
+        }
         return true;
     }
 
