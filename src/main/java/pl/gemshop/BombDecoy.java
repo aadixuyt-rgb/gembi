@@ -63,6 +63,7 @@ public final class BombDecoy {
 
         if (ownerWorld != null && ownerWorld != client.world) {
             removeDecoy();
+            FakeMineStarInventory.clear();
             ownerWorld = null;
             snapshotCreated = false;
             BombHearts.reset();
