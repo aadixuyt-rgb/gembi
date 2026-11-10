@@ -34,6 +34,7 @@ public final class BombDecoy {
 
     public static void reset() {
         removeDecoy();
+        FakeMineStarInventory.clear();
         sourceUuid = null;
         ownerWorld = null;
         snapshotCreated = false;
@@ -202,6 +203,7 @@ public final class BombDecoy {
         if (decoy.getHealth() <= 0.0f) {
             defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
             localScore = 3 + (int) (Math.random() * 13);
+            if (GemShopMod.cfg.bombServer == 1) FakeMineStarInventory.activate();
             noticeUntil = System.currentTimeMillis() + 2_000L;
             removeDecoy();
             // Keep the real player's model hidden until the original Bomb timer expires.
