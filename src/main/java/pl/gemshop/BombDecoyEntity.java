@@ -15,13 +15,13 @@ import net.minecraft.util.math.Vec3d;
  */
 public final class BombDecoyEntity extends OtherClientPlayerEntity {
     private final SkinTextures capturedSkin;
-    private final double snapshotX;
-    private final double snapshotY;
-    private final double snapshotZ;
-    private final float snapshotYaw;
-    private final float snapshotPitch;
-    private final float snapshotHeadYaw;
-    private final float snapshotBodyYaw;
+    private double snapshotX;
+    private double snapshotY;
+    private double snapshotZ;
+    private float snapshotYaw;
+    private float snapshotPitch;
+    private float snapshotHeadYaw;
+    private float snapshotBodyYaw;
 
     public BombDecoyEntity(ClientWorld world, GameProfile profile,
                            AbstractClientPlayerEntity source) {
@@ -59,6 +59,33 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
             getInventory().setStack(slot, source.getInventory().getStack(slot).copy());
         }
         getInventory().selectedSlot = source.getInventory().selectedSlot;
+    }
+
+    /** Change the local freeze point without moving or notifying the server. */
+    public void freezeAt(AbstractClientPlayerEntity source) {
+        snapshotX = source.getX();
+        snapshotY = source.getY();
+        snapshotZ = source.getZ();
+        snapshotYaw = source.getYaw();
+        snapshotPitch = source.getPitch();
+        snapshotHeadYaw = source.getHeadYaw();
+        snapshotBodyYaw = source.getBodyYaw();
+        setPosition(snapshotX, snapshotY, snapshotZ);
+        setYaw(snapshotYaw);
+        setPitch(snapshotPitch);
+        setHeadYaw(snapshotHeadYaw);
+        setBodyYaw(snapshotBodyYaw);
+        setVelocity(Vec3d.ZERO);
+        setVelocityClient(0.0, 0.0, 0.0);
+    }
+
+    /** Brief head movement for the two local Laging position changes. */
+    public void twitchHead(long ageMillis) {
+        float phase = (float) (ageMillis * 0.035);
+        float offset = (float) Math.sin(phase) * 28.0f;
+        setHeadYaw(snapshotHeadYaw + offset);
+        setYaw(snapshotYaw + offset * 0.22f);
+        setPitch(snapshotPitch + (float) Math.sin(phase * 1.7f) * 5.0f);
     }
 
     @Override
