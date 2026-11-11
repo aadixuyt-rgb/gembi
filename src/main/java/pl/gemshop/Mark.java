@@ -2,6 +2,7 @@ package pl.gemshop;
 
 import java.util.UUID;
 
+
 /** Local Bomb marker timer. Visual effects are handled by Esp. */
 public final class Mark {
     public static final long DELAY = 3_000L;
@@ -43,6 +44,7 @@ public final class Mark {
         end = now + DURATION;
         fakePing = 500 + (int) (Math.random() * 2001);
         timeoutUntil = 0L;
+        BombDecoy.playBombActivationSound();
     }
 
     public static void tick() {
