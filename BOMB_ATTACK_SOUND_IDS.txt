@@ -1,0 +1,41 @@
+GEMBI — dźwięki uderzeń (Minecraft Java 1.21.4)
+================================================
+
+Gembi odtwarza oryginalne eventy dźwiękowe Minecrafta. Warianty .ogg są
+losowane przez sam system dźwięku Minecrafta z plików vanilla assets.
+
+1. Trafienie krytyczne
+   Event: minecraft:entity.player.attack.crit
+   Warunek Gembi: cooldown >= 0.848, spadanie i spełnione warunki krytyka.
+
+2. Uderzenie z odrzutem (sprint)
+   Event: minecraft:entity.player.attack.knockback
+   Warunek Gembi: sprint i cooldown >= 0.848.
+
+3. Uderzenie mieczem z zamachem (sweep)
+   Event: minecraft:entity.player.attack.sweep
+   Warunek Gembi: miecz, ziemia, bez sprintu/krytyka i cooldown >= 0.848.
+
+4. Mocne, naładowane uderzenie
+   Event: minecraft:entity.player.attack.strong
+   Warunek Gembi: cooldown >= 0.848, ale bez krytyka/sweep/knockback.
+
+5. Słabe / nie naładowane uderzenie
+   Event: minecraft:entity.player.attack.weak
+   Warunek Gembi: cooldown < 0.848.
+
+6. Brak obrażeń (vanilla — np. trafienie bez skutku)
+   Event: minecraft:entity.player.attack.nodamage
+   Nie jest obecnie używany przez lokalny podgląd Gembi.
+
+Efekt trafienia:
+- Czerwone mignięcie modelu i animacja otrzymania obrażeń są uruchamiane
+  lokalnie przez LivingEntity.clientDamage(...).
+- Nie dokładamy entity.player.hurt jako drugiego dźwięku, bo nakładałby się
+  na dźwięk ataku i powodował efekt „stackowania”.
+
+Pliki audio:
+Gembi korzysta z plików .ogg dostarczanych z Minecraft Java assets.
+Nie kopiujemy ich do repozytorium ani nie konwertujemy na mp3 — są to
+oryginalne zasoby gry. Powyższe identyfikatory pozwalają znaleźć każdy event
+w lokalnym assets index Minecrafta.
