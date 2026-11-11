@@ -44,6 +44,8 @@ public final class FakeMineStarInventory {
                 }
             }
         }
+        // A player head is a reward; pumpkins are intentionally excluded.
+        add(rewards, Items.PLAYER_HEAD, 1);
         add(rewards, Items.FIREWORK_ROCKET, 64, 64, 64);
         add(rewards, Items.WHITE_WOOL, 36, 64, 23);
         add(rewards, Items.GOLDEN_APPLE, 64, 36);
@@ -78,7 +80,7 @@ public final class FakeMineStarInventory {
     private static boolean isBannedBania(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
         String path = Registries.ITEM.getId(stack.getItem()).getPath();
-        return path.contains("pumpkin") || path.endsWith("_head") || path.endsWith("_skull");
+        return path.equals("pumpkin") || path.equals("carved_pumpkin");
     }
 
     public static ItemStack getFake(Slot slot) {
