@@ -44,8 +44,8 @@ public final class FakeMineStarInventory {
                 }
             }
         }
-        // A player head is a reward; pumpkins are intentionally excluded.
-        add(rewards, Items.PLAYER_HEAD, 1);
+        // The only head reward is the exact head item worn in armor slot 39 above.
+        // Never generate a generic player head when the copy was not wearing one.
         add(rewards, Items.FIREWORK_ROCKET, 64, 64, 64);
         add(rewards, Items.WHITE_WOOL, 36, 64, 23);
         add(rewards, Items.GOLDEN_APPLE, 64, 36);
