@@ -70,9 +70,14 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
 
     /** Change the local freeze point without moving or notifying the server. */
     public void freezeAt(AbstractClientPlayerEntity source) {
-        snapshotX = source.getX();
-        snapshotY = source.getY();
-        snapshotZ = source.getZ();
+        freezeAt(source, source.getX(), source.getY(), source.getZ());
+    }
+
+    /** Update the snapshot orientation while placing it at a locally limited position. */
+    public void freezeAt(AbstractClientPlayerEntity source, double x, double y, double z) {
+        snapshotX = x;
+        snapshotY = y;
+        snapshotZ = z;
         snapshotYaw = source.getYaw();
         snapshotPitch = source.getPitch();
         snapshotHeadYaw = source.getHeadYaw();
