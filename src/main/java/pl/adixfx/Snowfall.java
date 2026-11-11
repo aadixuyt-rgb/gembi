@@ -33,7 +33,7 @@ public final class Snowfall {
         }
 
         int intensity = Math.max(1, Math.min(3, Config.d.snowIntensity));
-        int target = intensity == 1 ? 42 : intensity == 2 ? 76 : 130;
+        int target = intensity == 1 ? 90 : intensity == 2 ? 220 : 480;
         long now = System.nanoTime();
 
         Iterator<Flake> iterator = FLAKES.iterator();
