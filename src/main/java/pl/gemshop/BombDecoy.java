@@ -260,19 +260,9 @@ public final class BombDecoy {
                     client.player.getZ()
             ));
 
-            // Play the target's hurt response locally at the copy's position.
-            // The vanilla attack packet is cancelled by BombAttackMixin, so this
-            // explicit sound is needed for every successful hit.
-            client.getSoundManager().play(new PositionedSoundInstance(
-                    SoundEvents.ENTITY_PLAYER_HURT,
-                    SoundCategory.PLAYERS,
-                    0.9F,
-                    1.0F,
-                    Random.create(),
-                    decoy.getX(),
-                    decoy.getY(),
-                    decoy.getZ()
-            ));
+            // Do not layer ENTITY_PLAYER_HURT over the attack sound. The copy's
+            // local damage animation is already triggered by clientDamage above;
+            // the extra hurt audio made critical hits sound like two stacked hits.
         }
         BombHearts.onDamage(decoy, previousHealth);
 
