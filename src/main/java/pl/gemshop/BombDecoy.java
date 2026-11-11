@@ -30,6 +30,7 @@ public final class BombDecoy {
     private static long noticeUntil;
     private static long spawnedAt;
     private static int lagStage;
+    private static long nextLagUpdateAt;
     private static int localScore;
 
     private BombDecoy() {}
@@ -44,6 +45,7 @@ public final class BombDecoy {
         noticeUntil = 0L;
         spawnedAt = 0L;
         lagStage = 0;
+        nextLagUpdateAt = 0L;
         localScore = 0;
         BombHearts.reset();
     }
@@ -75,16 +77,29 @@ public final class BombDecoy {
         if (!Mark.active()) return;
         if (snapshotCreated) {
             if (GemShopMod.cfg.bombMode == 1 && decoy != null && !decoy.isRemoved()) {
-                long age = System.currentTimeMillis() - spawnedAt;
+                long now = System.currentTimeMillis();
+                long age = now - spawnedAt;
                 AbstractClientPlayerEntity liveSource = findSource(client.world);
-                if (liveSource != null && age >= 1_000L && lagStage == 0) {
-                    decoy.freezeAt(liveSource);
-                    lagStage = 1;
-                } else if (liveSource != null && age >= 2_000L && lagStage == 1) {
-                    decoy.freezeAt(liveSource);
-                    lagStage = 2;
+                if (liveSource != null && now >= nextLagUpdateAt) {
+                    // In Laging mode the copy catches up in one-second steps,
+                    // moving no more than four blocks on each update.
+                    double dx = liveSource.getX() - decoy.getX();
+                    double dy = liveSource.getY() - decoy.getY();
+                    double dz = liveSource.getZ() - decoy.getZ();
+                    double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    double step = Math.min(4.0D, distance);
+                    if (distance > 1.0E-6D) {
+                        double scale = step / distance;
+                        decoy.freezeAt(liveSource,
+                                decoy.getX() + dx * scale,
+                                decoy.getY() + dy * scale,
+                                decoy.getZ() + dz * scale);
+                    } else {
+                        decoy.freezeAt(liveSource, liveSource.getX(), liveSource.getY(), liveSource.getZ());
+                    }
+                    nextLagUpdateAt = now + 1_000L;
                 }
-                if (lagStage < 2) decoy.twitchHead(age);
+                decoy.twitchHead(age);
             }
             BombHearts.tick(decoy);
             return;
@@ -121,6 +136,8 @@ public final class BombDecoy {
         noticeUntil = 0L;
         spawnedAt = System.currentTimeMillis();
         lagStage = 0;
+        nextLagUpdateAt = spawnedAt + 1_000L;
+        playCopySpawnSound();
         BombHearts.reset();
         BombHearts.tick(copy);
     }
@@ -257,6 +274,24 @@ public final class BombDecoy {
 
     public static long noticeRemaining() {
         return Math.max(0L, noticeUntil - System.currentTimeMillis());
+    }
+
+    public static void playBombActivationSound() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        client.getSoundManager().play(new PositionedSoundInstance(
+                SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.PLAYERS, 0.8F, 1.0F,
+                Random.create(), client.player.getX(), client.player.getY(), client.player.getZ()
+        ));
+    }
+
+    private static void playCopySpawnSound() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        client.getSoundManager().play(new PositionedSoundInstance(
+                SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 0.75F, 1.15F,
+                Random.create(), client.player.getX(), client.player.getY(), client.player.getZ()
+        ));
     }
 
     private static void removeDecoy() {
