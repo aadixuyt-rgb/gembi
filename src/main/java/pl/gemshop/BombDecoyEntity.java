@@ -5,6 +5,8 @@ import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.client.util.SkinTextures;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityPose;
 
 /**
  * Client-only frozen snapshot. All player rotations and pose are copied before
@@ -32,15 +34,31 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
         setAbsorptionAmount(source.getAbsorptionAmount());
 
         // Capture exact orientation once, before spawn: no post-spawn tracking/teleporting.
-        refreshPositionAndAngles(source.getX(), source.getY(), source.getZ(),
+        refreshPositionAndAngles(source.getX(), source.getY(), source.getZ(), 
                 source.getYaw(), source.getPitch());
         setHeadYaw(source.getHeadYaw());
         setBodyYaw(source.getBodyYaw());
         setVelocity(0.0, 0.0, 0.0);
         setSneaking(source.isSneaking());
         setSprinting(source.isSprinting());
-        if (source.isGliding()) startGliding();
+        if (source.isGliding()) {
+            startGliding();
+            setPose(EntityPose.FALL_FLYING);
+            calculateDimensions();
+        }
         setNoGravity(true);
+    }
+
+    /**
+     * Match the compact vanilla player hitbox while the snapshot is gliding.
+     * The normal standing dimensions are preserved for every other pose.
+     */
+    @Override
+    public EntityDimensions getDimensions(EntityPose pose) {
+        if (pose == EntityPose.FALL_FLYING) {
+            return EntityDimensions.changing(0.6F, 0.6F);
+        }
+        return super.getDimensions(pose);
     }
 
     @Override
