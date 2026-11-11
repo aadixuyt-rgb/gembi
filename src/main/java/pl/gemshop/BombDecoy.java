@@ -176,7 +176,6 @@ public final class BombDecoy {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world != null) {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
-            decoy.swingHand(net.minecraft.util.Hand.MAIN_HAND);
             decoy.setHealth(resultingHealth);
 
             // Vanilla Java special attacks require at least 84.8% cooldown.
