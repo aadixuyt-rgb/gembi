@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -27,17 +28,22 @@ public final class FakeMineStarInventory {
         active = false;
     }
 
-    public static void activate() {
+    public static void activate(BombDecoyEntity defeatedCopy) {
         clear();
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return;
         List<ItemStack> rewards = new ArrayList<>();
-        List<Item> armor = new ArrayList<>(List.of(
-                Items.NETHERITE_BOOTS, Items.NETHERITE_LEGGINGS,
-                Items.NETHERITE_CHESTPLATE, Items.NETHERITE_HELMET));
-        Collections.shuffle(armor);
-        rewards.add(new ItemStack(armor.get(0)));
-        rewards.add(new ItemStack(armor.get(1)));
+
+        // Preserve the exact armor worn by the defeated copy, including dyed leather,
+        // trims, enchantments and other item components.
+        if (defeatedCopy != null) {
+            for (int armorSlot = 36; armorSlot <= 39; armorSlot++) {
+                ItemStack worn = defeatedCopy.getInventory().getStack(armorSlot);
+                if (!worn.isEmpty() && !isBannedBania(worn)) {
+                    rewards.add(worn.copy());
+                }
+            }
+        }
         add(rewards, Items.FIREWORK_ROCKET, 64, 64, 64);
         add(rewards, Items.WHITE_WOOL, 36, 64, 23);
         add(rewards, Items.GOLDEN_APPLE, 64, 36);
@@ -63,7 +69,16 @@ public final class FakeMineStarInventory {
     }
 
     private static void add(List<ItemStack> out, Item item, int... counts) {
+        ItemStack stack = new ItemStack(item);
+        if (isBannedBania(stack)) return;
         for (int count : counts) out.add(new ItemStack(item, count));
+    }
+
+    // "Bania" is excluded from MineStar rewards: pumpkins and mob/player heads.
+    private static boolean isBannedBania(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return false;
+        String path = Registries.ITEM.getId(stack.getItem()).getPath();
+        return path.contains("pumpkin") || path.endsWith("_head") || path.endsWith("_skull");
     }
 
     public static ItemStack getFake(Slot slot) {
