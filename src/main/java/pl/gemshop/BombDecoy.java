@@ -198,16 +198,23 @@ public final class BombDecoy {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
             decoy.setHealth(resultingHealth);
 
-            // Mirror the main vanilla player-attack sound families for the
-            // local preview: critical, sprint knockback, sword sweep, weak and strong.
+            // Match vanilla's attack cooldown: the interaction-manager call is
+            // cancelled by the mixin, so this reset must be done here as well.
             float cooldown = attacker.getAttackCooldownProgress(0.5F);
-            boolean critical = attacker.fallDistance > 0.0F
+            attacker.resetLastAttackedTicks();
+
+            boolean livingTarget = decoy instanceof net.minecraft.entity.LivingEntity;
+            boolean critical = livingTarget
+                    && cooldown > 0.9F
+                    && attacker.fallDistance > 0.0F
                     && !attacker.isOnGround()
                     && !attacker.isClimbing()
                     && !attacker.isTouchingWater()
                     && !attacker.hasVehicle()
-                    && !attacker.isSprinting();
-            boolean sweeping = !critical
+                    && !attacker.isSprinting()
+                    && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.BLINDNESS);
+            boolean sweeping = livingTarget
+                    && !critical
                     && cooldown > 0.9F
                     && attacker.isOnGround()
                     && !attacker.isSprinting()
@@ -217,6 +224,7 @@ public final class BombDecoy {
             net.minecraft.sound.SoundEvent attackSound;
             if (critical) {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_CRIT;
+                attacker.addCritParticles(decoy);
             } else if (attacker.isSprinting()) {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK;
             } else if (sweeping) {
@@ -227,15 +235,16 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // Submit the sound directly to the client SoundManager.
-            // This avoids relying on ClientWorld's entity/world sound routing.
-            float attackPitch = critical ? 1.0F : (sweeping ? 0.9F : (cooldown < 0.9F ? 0.75F : 1.0F));
+            // Use a fresh Minecraft random source for each hit. The sound event
+            // selects its own variants and the pitch also varies like vanilla.
+            Random attackRandom = Random.create();
+            float attackPitch = 0.9F + attackRandom.nextFloat() * 0.2F;
             client.getSoundManager().play(new PositionedSoundInstance(
                     attackSound,
                     SoundCategory.PLAYERS,
                     1.0F,
                     attackPitch,
-                    Random.create(),
+                    attackRandom,
                     client.player.getX(),
                     client.player.getY(),
                     client.player.getZ()
