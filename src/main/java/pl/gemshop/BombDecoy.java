@@ -7,10 +7,8 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.random.Random;
 
 import java.util.UUID;
 
@@ -223,23 +221,32 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // Keep vanilla pitch at 1.0. Random sound variants are selected by
-            // the sound event itself, just like in Minecraft.
-            Random attackRandom = Random.create();
-            client.getSoundManager().play(new PositionedSoundInstance(
+            // Let ClientWorld play the event with its own fresh sound seed.
+            // This follows vanilla's sound path and lets sounds.json choose among
+            // the weighted variants (for example, the six strong-hit samples).
+            client.world.playSound(
+                    attacker.getX(),
+                    attacker.getY(),
+                    attacker.getZ(),
                     attackSound,
                     SoundCategory.PLAYERS,
                     1.0F,
                     1.0F,
-                    attackRandom,
-                    client.player.getX(),
-                    client.player.getY(),
-                    client.player.getZ()
-            ));
+                    true
+            );
 
-            // Do not layer ENTITY_PLAYER_HURT over the attack sound. The copy's
-            // local damage animation is already triggered by clientDamage above;
-            // the extra hurt audio made critical hits sound like two stacked hits.
+            // A real player also plays a hurt sound when damaged. Keep this quieter
+            // than the attack event so the impact is audible without overpowering it.
+            client.world.playSound(
+                    decoy.getX(),
+                    decoy.getY(),
+                    decoy.getZ(),
+                    SoundEvents.ENTITY_PLAYER_HURT,
+                    SoundCategory.PLAYERS,
+                    0.55F,
+                    1.0F,
+                    true
+            );
         }
         BombHearts.onDamage(decoy, previousHealth);
 
