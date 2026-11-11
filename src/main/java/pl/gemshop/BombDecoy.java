@@ -99,7 +99,6 @@ public final class BombDecoy {
                     }
                     nextLagUpdateAt = now + 1_000L;
                 }
-                decoy.twitchHead(age);
             }
             BombHearts.tick(decoy);
             return;
