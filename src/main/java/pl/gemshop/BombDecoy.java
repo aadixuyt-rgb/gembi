@@ -76,30 +76,8 @@ public final class BombDecoy {
         // The internal 3-second delay is not shown. The public HUD begins at 0:57.
         if (!Mark.active()) return;
         if (snapshotCreated) {
-            if (GemShopMod.cfg.bombMode == 1 && decoy != null && !decoy.isRemoved()) {
-                long now = System.currentTimeMillis();
-                long age = now - spawnedAt;
-                AbstractClientPlayerEntity liveSource = findSource(client.world);
-                if (liveSource != null && now >= nextLagUpdateAt) {
-                    // In Laging mode the copy catches up in one-second steps,
-                    // moving no more than four blocks on each update.
-                    double dx = liveSource.getX() - decoy.getX();
-                    double dy = liveSource.getY() - decoy.getY();
-                    double dz = liveSource.getZ() - decoy.getZ();
-                    double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                    double step = Math.min(4.0D, distance);
-                    if (distance > 1.0E-6D) {
-                        double scale = step / distance;
-                        decoy.freezeAt(liveSource,
-                                decoy.getX() + dx * scale,
-                                decoy.getY() + dy * scale,
-                                decoy.getZ() + dz * scale);
-                    } else {
-                        decoy.freezeAt(liveSource, liveSource.getX(), liveSource.getY(), liveSource.getZ());
-                    }
-                    nextLagUpdateAt = now + 1_000L;
-                }
-            }
+            // Keep the visual copy synchronized every client tick in both modes.
+            // This avoids the old stationary snapshot / one-second teleport behavior.
             BombHearts.tick(decoy);
             return;
         }
@@ -136,7 +114,6 @@ public final class BombDecoy {
         spawnedAt = System.currentTimeMillis();
         lagStage = 0;
         nextLagUpdateAt = spawnedAt + 1_000L;
-        playCopySpawnSound();
         BombHearts.reset();
         BombHearts.tick(copy);
     }
@@ -199,6 +176,7 @@ public final class BombDecoy {
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world != null) {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
+            decoy.swingHand(net.minecraft.util.Hand.MAIN_HAND);
             decoy.setHealth(resultingHealth);
 
             // Vanilla Java special attacks require at least 84.8% cooldown.
@@ -267,10 +245,17 @@ public final class BombDecoy {
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
-            defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
-            localScore = 3 + (int) (Math.random() * 13);
-            if (GemShopMod.cfg.bombServer == 1) FakeMineStarInventory.activate(decoy);
-            noticeUntil = System.currentTimeMillis() + 2_000L;
+            // Survival has no fake kill message or score. MineStar preview keeps its local reward UI.
+            if (GemShopMod.cfg.bombServer == 1) {
+                defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
+                localScore = 3 + (int) (Math.random() * 13);
+                FakeMineStarInventory.activate(decoy);
+                noticeUntil = System.currentTimeMillis() + 2_000L;
+            } else {
+                defeatedName = null;
+                localScore = 0;
+                noticeUntil = 0L;
+            }
             removeDecoy();
             // Keep the real player's model hidden until the original Bomb timer expires.
         }
@@ -290,15 +275,6 @@ public final class BombDecoy {
 
     public static long noticeRemaining() {
         return Math.max(0L, noticeUntil - System.currentTimeMillis());
-    }
-
-    private static void playCopySpawnSound() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null) return;
-        client.getSoundManager().play(new PositionedSoundInstance(
-                SoundEvents.ENTITY_ENDERMAN_TELEPORT, SoundCategory.PLAYERS, 0.75F, 1.15F,
-                Random.create(), client.player.getX(), client.player.getY(), client.player.getZ()
-        ));
     }
 
     private static void removeDecoy() {
