@@ -63,14 +63,42 @@ public final class Esp {
         if (mc.player == null || mc.world == null) return null;
         Vec3d start = mc.player.getCameraPosVec(pt);
         Vec3d end = start.add(mc.player.getRotationVec(pt).multiply(160));
+
+        // Najpierw zachowaj dotychczasowe, precyzyjne trafienie celownikiem.
         AbstractClientPlayerEntity best = null;
-        double bd = Double.MAX_VALUE;
+        double bestDistance = Double.MAX_VALUE;
         for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
             if (p == mc.player || p.isSpectator() || BombDecoy.shouldHide(p)) continue;
             Optional<Vec3d> hit = p.getBoundingBox().expand(0.15).raycast(start, end);
             if (hit.isPresent()) {
-                double d = start.squaredDistanceTo(hit.get());
-                if (d < bd) { bd = d; best = p; }
+                double distance = start.squaredDistanceTo(hit.get());
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    best = p;
+                }
+            }
+        }
+        if (best != null) return best;
+
+        // Gdy promień nie trafił dokładnie w gracza, użyj wąskiego stożka
+        // wokół celownika. Wybierany jest najbliższy gracz wzdłuż kierunku patrzenia.
+        final double maxFallbackDistance = 64.0;
+        final double coneAngleRadians = Math.toRadians(3.0);
+        bestDistance = Double.MAX_VALUE;
+        for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
+            if (p == mc.player || p.isSpectator() || BombDecoy.shouldHide(p)) continue;
+
+            double targetDistance = start.distanceTo(p.getBoundingBox().getCenter());
+            if (targetDistance > maxFallbackDistance) continue;
+
+            double coneRadius = Math.tan(coneAngleRadians) * targetDistance;
+            Optional<Vec3d> hit = p.getBoundingBox().expand(0.15 + coneRadius).raycast(start, end);
+            if (hit.isPresent()) {
+                double distance = start.squaredDistanceTo(hit.get());
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    best = p;
+                }
             }
         }
         return best;
