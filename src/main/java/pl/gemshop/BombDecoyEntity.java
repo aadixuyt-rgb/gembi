@@ -5,8 +5,7 @@ import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.client.util.SkinTextures;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityPose;
+import net.minecraft.util.math.Box;
 
 /**
  * Client-only frozen snapshot. All player rotations and pose are copied before
@@ -34,31 +33,24 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
         setAbsorptionAmount(source.getAbsorptionAmount());
 
         // Capture exact orientation once, before spawn: no post-spawn tracking/teleporting.
-        refreshPositionAndAngles(source.getX(), source.getY(), source.getZ(), 
+        refreshPositionAndAngles(source.getX(), source.getY(), source.getZ(),
                 source.getYaw(), source.getPitch());
         setHeadYaw(source.getHeadYaw());
         setBodyYaw(source.getBodyYaw());
         setVelocity(0.0, 0.0, 0.0);
         setSneaking(source.isSneaking());
         setSprinting(source.isSprinting());
+
         if (source.isGliding()) {
             startGliding();
-            setPose(EntityPose.FALL_FLYING);
-            calculateDimensions();
+            // Fall-flying player collision box is compact. LivingEntity#getDimensions
+            // is final in this Minecraft version, so set the snapshot box directly.
+            double x = getX();
+            double y = getY();
+            double z = getZ();
+            setBoundingBox(new Box(x - 0.3, y, z - 0.3, x + 0.3, y + 0.6, z + 0.3));
         }
         setNoGravity(true);
-    }
-
-    /**
-     * Match the compact vanilla player hitbox while the snapshot is gliding.
-     * The normal standing dimensions are preserved for every other pose.
-     */
-    @Override
-    public EntityDimensions getDimensions(EntityPose pose) {
-        if (pose == EntityPose.FALL_FLYING) {
-            return EntityDimensions.changing(0.6F, 0.6F);
-        }
-        return super.getDimensions(pose);
     }
 
     @Override
