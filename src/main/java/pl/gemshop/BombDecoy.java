@@ -229,15 +229,30 @@ public final class BombDecoy {
 
             // Submit the sound directly to the client SoundManager.
             // This avoids relying on ClientWorld's entity/world sound routing.
+            float attackPitch = critical ? 1.0F : (sweeping ? 0.9F : (cooldown < 0.9F ? 0.75F : 1.0F));
             client.getSoundManager().play(new PositionedSoundInstance(
                     attackSound,
                     SoundCategory.PLAYERS,
                     1.0F,
-                    1.0F,
+                    attackPitch,
                     Random.create(),
                     client.player.getX(),
                     client.player.getY(),
                     client.player.getZ()
+            ));
+
+            // Play the target's hurt response locally at the copy's position.
+            // The vanilla attack packet is cancelled by BombAttackMixin, so this
+            // explicit sound is needed for every successful hit.
+            client.getSoundManager().play(new PositionedSoundInstance(
+                    SoundEvents.ENTITY_PLAYER_HURT,
+                    SoundCategory.PLAYERS,
+                    0.9F,
+                    1.0F,
+                    Random.create(),
+                    decoy.getX(),
+                    decoy.getY(),
+                    decoy.getZ()
             ));
         }
         decoy.maxHurtTime = 10;
@@ -273,15 +288,6 @@ public final class BombDecoy {
 
     public static long noticeRemaining() {
         return Math.max(0L, noticeUntil - System.currentTimeMillis());
-    }
-
-    public static void playBombActivationSound() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null) return;
-        client.getSoundManager().play(new PositionedSoundInstance(
-                SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.PLAYERS, 0.8F, 1.0F,
-                Random.create(), client.player.getX(), client.player.getY(), client.player.getZ()
-        ));
     }
 
     private static void playCopySpawnSound() {
