@@ -22,10 +22,6 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
     private float snapshotPitch;
     private float snapshotHeadYaw;
     private float snapshotBodyYaw;
-    private float visualYaw;
-    private float visualPitch;
-    private float visualHeadYaw;
-    private boolean headTwitchActive;
 
     public BombDecoyEntity(ClientWorld world, GameProfile profile,
                            AbstractClientPlayerEntity source) {
@@ -38,18 +34,15 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
         this.snapshotPitch = source.getPitch();
         this.snapshotHeadYaw = source.getHeadYaw();
         this.snapshotBodyYaw = source.getBodyYaw();
-        this.visualYaw = snapshotYaw;
-        this.visualPitch = snapshotPitch;
-        this.visualHeadYaw = snapshotHeadYaw;
 
         setCustomName(source.getDisplayName());
         setCustomNameVisible(true);
         setNoGravity(true);
         setVelocity(Vec3d.ZERO);
         setPosition(snapshotX, snapshotY, snapshotZ);
-        setYaw(headTwitchActive ? visualYaw : snapshotYaw);
-        setPitch(headTwitchActive ? visualPitch : snapshotPitch);
-        setHeadYaw(headTwitchActive ? visualHeadYaw : snapshotHeadYaw);
+        setYaw(snapshotYaw);
+        setPitch(snapshotPitch);
+        setHeadYaw(snapshotHeadYaw);
         setBodyYaw(snapshotBodyYaw);
         setPose(source.getPose());
         setSneaking(source.isSneaking());
@@ -87,22 +80,8 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
         setPitch(snapshotPitch);
         setHeadYaw(snapshotHeadYaw);
         setBodyYaw(snapshotBodyYaw);
-        visualYaw = snapshotYaw;
-        visualPitch = snapshotPitch;
-        visualHeadYaw = snapshotHeadYaw;
-        headTwitchActive = false;
         setVelocity(Vec3d.ZERO);
         setVelocityClient(0.0, 0.0, 0.0);
-    }
-
-    /** Brief head movement for the two local Laging position changes. */
-    public void twitchHead(long ageMillis) {
-        float phase = (float) (ageMillis * 0.035);
-        float offset = (float) Math.sin(phase) * 28.0f;
-        visualHeadYaw = snapshotHeadYaw + offset;
-        visualYaw = snapshotYaw + offset * 0.22f;
-        visualPitch = snapshotPitch + (float) Math.sin(phase * 1.7f) * 5.0f;
-        headTwitchActive = true;
     }
 
     @Override
@@ -117,9 +96,9 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
         setPosition(snapshotX, snapshotY, snapshotZ);
         setVelocity(Vec3d.ZERO);
         setVelocityClient(0.0, 0.0, 0.0);
-        setYaw(headTwitchActive ? visualYaw : snapshotYaw);
-        setPitch(headTwitchActive ? visualPitch : snapshotPitch);
-        setHeadYaw(headTwitchActive ? visualHeadYaw : snapshotHeadYaw);
+        setYaw(snapshotYaw);
+        setPitch(snapshotPitch);
+        setHeadYaw(snapshotHeadYaw);
         setBodyYaw(snapshotBodyYaw);
         setNoGravity(true);
     }
