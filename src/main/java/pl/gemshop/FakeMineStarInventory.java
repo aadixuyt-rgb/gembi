@@ -34,18 +34,29 @@ public final class FakeMineStarInventory {
         if (mc.player == null) return;
         List<ItemStack> rewards = new ArrayList<>();
 
-        // Preserve the exact armor worn by the defeated copy, including dyed leather,
-        // trims, enchantments and other item components.
         if (defeatedCopy != null) {
+            // Pick at most two random worn armor pieces. ItemStack.copy() preserves
+            // custom names, enchantments, dye, trims and other item components.
+            List<ItemStack> wornArmor = new ArrayList<>();
             for (int armorSlot = 36; armorSlot <= 39; armorSlot++) {
                 ItemStack worn = defeatedCopy.getInventory().getStack(armorSlot);
                 if (!worn.isEmpty() && !isBannedBania(worn)) {
-                    rewards.add(worn.copy());
+                    wornArmor.add(worn.copy());
                 }
             }
+            Collections.shuffle(wornArmor);
+            rewards.addAll(wornArmor.subList(0, Math.min(2, wornArmor.size())));
+
+            // Also reward anything held in the main hand or offhand, preserving
+            // the complete original stack (custom name, enchantments, count, etc.).
+            int selectedHotbarSlot = defeatedCopy.getInventory().selectedSlot;
+            if (selectedHotbarSlot >= 0 && selectedHotbarSlot <= 8) {
+                ItemStack mainHand = defeatedCopy.getInventory().getStack(selectedHotbarSlot);
+                if (!mainHand.isEmpty()) rewards.add(mainHand.copy());
+            }
+            ItemStack offHand = defeatedCopy.getInventory().getStack(40);
+            if (!offHand.isEmpty()) rewards.add(offHand.copy());
         }
-        // The only head reward is the exact head item worn in armor slot 39 above.
-        // Never generate a generic player head when the copy was not wearing one.
         add(rewards, Items.FIREWORK_ROCKET, 64, 64, 64);
         add(rewards, Items.WHITE_WOOL, 36, 64, 23);
         add(rewards, Items.GOLDEN_APPLE, 64, 36);
