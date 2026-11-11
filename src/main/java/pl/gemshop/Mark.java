@@ -44,7 +44,6 @@ public final class Mark {
         end = now + DURATION;
         fakePing = 500 + (int) (Math.random() * 2001);
         timeoutUntil = 0L;
-        BombDecoy.playBombActivationSound();
     }
 
     public static void tick() {
