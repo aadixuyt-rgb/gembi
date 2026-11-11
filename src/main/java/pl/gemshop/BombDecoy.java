@@ -187,6 +187,9 @@ public final class BombDecoy {
             return false;
         }
 
+        // Capture the cooldown before changing preview health or resetting the attack timer.
+        float cooldown = attacker.getAttackCooldownProgress(0.5F);
+
         // Wyłącznie lokalny podgląd: suwak podaje serca, Minecraft HP.
         float damage = Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
         float previousHealth = decoy.getHealth();
@@ -198,24 +201,32 @@ public final class BombDecoy {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
             decoy.setHealth(resultingHealth);
 
-            // Match vanilla's attack cooldown: the interaction-manager call is
-            // cancelled by the mixin, so this reset must be done here as well.
-            float cooldown = attacker.getAttackCooldownProgress(0.5F);
+            // Vanilla Java special attacks require at least 84.8% cooldown.
+            // The previous 0.9 threshold incorrectly played the weak-hit sound
+            // for valid critical hits in the 84.8%-90% cooldown range.
             attacker.resetLastAttackedTicks();
 
             boolean livingTarget = decoy instanceof net.minecraft.entity.LivingEntity;
             boolean critical = livingTarget
-                    && cooldown > 0.9F
+                    && cooldown >= 0.848F
                     && attacker.fallDistance > 0.0F
                     && !attacker.isOnGround()
                     && !attacker.isClimbing()
                     && !attacker.isTouchingWater()
+                    && !attacker.isSwimming()
+                    && !attacker.isGliding()
                     && !attacker.hasVehicle()
                     && !attacker.isSprinting()
-                    && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.BLINDNESS);
+                    && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.BLINDNESS)
+                    && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.SLOW_FALLING)
+                    && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.LEVITATION);
+            boolean sprintKnockback = livingTarget
+                    && cooldown >= 0.848F
+                    && attacker.isSprinting();
             boolean sweeping = livingTarget
                     && !critical
-                    && cooldown > 0.9F
+                    && !sprintKnockback
+                    && cooldown >= 0.848F
                     && attacker.isOnGround()
                     && !attacker.isSprinting()
                     && attacker.getMainHandStack().isIn(net.minecraft.registry.tag.ItemTags.SWORDS)
@@ -225,25 +236,24 @@ public final class BombDecoy {
             if (critical) {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_CRIT;
                 attacker.addCritParticles(decoy);
-            } else if (attacker.isSprinting()) {
+            } else if (sprintKnockback) {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK;
             } else if (sweeping) {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP;
-            } else if (cooldown < 0.9F) {
+            } else if (cooldown < 0.848F) {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_WEAK;
             } else {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // Use a fresh Minecraft random source for each hit. The sound event
-            // selects its own variants and the pitch also varies like vanilla.
+            // Keep vanilla pitch at 1.0. Random sound variants are selected by
+            // the sound event itself, just like in Minecraft.
             Random attackRandom = Random.create();
-            float attackPitch = 0.9F + attackRandom.nextFloat() * 0.2F;
             client.getSoundManager().play(new PositionedSoundInstance(
                     attackSound,
                     SoundCategory.PLAYERS,
                     1.0F,
-                    attackPitch,
+                    1.0F,
                     attackRandom,
                     client.player.getX(),
                     client.player.getY(),
