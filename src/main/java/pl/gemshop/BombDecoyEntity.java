@@ -44,7 +44,8 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
         setPose(source.getPose());
         setSneaking(source.isSneaking());
         setSprinting(source.isSprinting());
-        setGliding(source.isGliding());
+        if (source.isGliding() && !isGliding()) startGliding();
+        else if (!source.isGliding() && isGliding()) stopGliding();
         setNoGravity(true);
     }
 
