@@ -18,9 +18,11 @@ public abstract class FakeMineStarInventoryMixin {
         FakeMineStarInventory.render(context, slot);
     }
 
-    @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
-    private void gembi$dropFakeMineStarItem(Slot slot, int slotId, int button,
-                                            SlotActionType actionType, CallbackInfo ci) {
+    @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;Lnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
+    private void gembi$handleFakeMineStarItemClick(Slot slot,
+                                                   SlotActionType actionType,
+                                                   CallbackInfo ci) {
+        // This overload is used by both mouse actions and the Q drop-key path.
         if (FakeMineStarInventory.handleClick(slot, actionType)) ci.cancel();
     }
 }
