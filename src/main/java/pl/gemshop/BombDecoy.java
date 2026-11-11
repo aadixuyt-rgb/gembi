@@ -7,7 +7,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 
 import java.util.UUID;
@@ -71,11 +70,8 @@ public final class BombDecoy {
             BombHearts.reset();
         }
 
-        // The internal 3-second delay is not shown. The public HUD begins at 0:57.
         if (!Mark.active()) return;
         if (snapshotCreated) {
-            // Keep the visual copy synchronized every client tick in both modes.
-            // This avoids the old stationary snapshot / one-second teleport behavior.
             BombHearts.tick(decoy);
             return;
         }
@@ -131,7 +127,6 @@ public final class BombDecoy {
         return decoy != null && entity == decoy && !decoy.isRemoved();
     }
 
-    /** The marked visual is the real player during the 3-second delay, then the local copy. */
     public static boolean isMarkedVisual(AbstractClientPlayerEntity player) {
         if (player == null) return false;
         if (isDecoy(player)) return true;
@@ -152,8 +147,6 @@ public final class BombDecoy {
             return false;
         }
 
-        // If a client still reports the hidden source as the crosshair target,
-        // route that attack to the visible local snapshot instead.
         Entity resolvedTarget = target;
         if (shouldHide(target)) {
             resolvedTarget = getDecoy();
@@ -162,50 +155,41 @@ public final class BombDecoy {
             return false;
         }
 
-        // Capture the cooldown before changing preview health or resetting the attack timer.
+        // Read the cooldown and fall state before resetting the attack timer.
         float cooldown = attacker.getAttackCooldownProgress(0.5F);
+        boolean livingTarget = decoy instanceof net.minecraft.entity.LivingEntity;
+        boolean critical = livingTarget
+                && cooldown >= 0.848F
+                && attacker.fallDistance > 0.0F
+                && !attacker.isOnGround()
+                && !attacker.isClimbing()
+                && !attacker.isTouchingWater()
+                && !attacker.isSwimming()
+                && !attacker.hasVehicle()
+                && !attacker.isSprinting()
+                && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.BLINDNESS)
+                && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.LEVITATION);
+        boolean sprintKnockback = livingTarget
+                && cooldown >= 0.848F
+                && attacker.isSprinting();
+        boolean sweeping = livingTarget
+                && !critical
+                && !sprintKnockback
+                && cooldown >= 0.848F
+                && attacker.isOnGround()
+                && !attacker.isSprinting()
+                && attacker.getMainHandStack().isIn(net.minecraft.registry.tag.ItemTags.SWORDS)
+                && attacker.getVelocity().horizontalLengthSquared() < 0.1D;
 
-        // Wyłącznie lokalny podgląd: suwak podaje serca, Minecraft HP.
         float damage = Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
         float previousHealth = decoy.getHealth();
         float resultingHealth = Math.max(0.0f, previousHealth - damage);
-        // Trigger the normal local hurt response, then restore the exact preview
-        // health value so clientDamage cannot apply the configured damage twice.
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.world != null) {
+            // Keep the vanilla hurt animation, but do not add a second generic
+            // player-hurt sound over the attack sound.
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
             decoy.setHealth(resultingHealth);
-
-            // Vanilla Java special attacks require at least 84.8% cooldown.
-            // The previous 0.9 threshold incorrectly played the weak-hit sound
-            // for valid critical hits in the 84.8%-90% cooldown range.
-            attacker.resetLastAttackedTicks();
-
-            boolean livingTarget = decoy instanceof net.minecraft.entity.LivingEntity;
-            boolean critical = livingTarget
-                    && cooldown >= 0.848F
-                    && attacker.fallDistance > 0.0F
-                    && !attacker.isOnGround()
-                    && !attacker.isClimbing()
-                    && !attacker.isTouchingWater()
-                    && !attacker.isSwimming()
-                    && !attacker.isGliding()
-                    && !attacker.hasVehicle()
-                    && !attacker.isSprinting()
-                    && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.BLINDNESS)
-                    && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.SLOW_FALLING)
-                    && !attacker.hasStatusEffect(net.minecraft.entity.effect.StatusEffects.LEVITATION);
-            boolean sprintKnockback = livingTarget
-                    && cooldown >= 0.848F
-                    && attacker.isSprinting();
-            boolean sweeping = livingTarget
-                    && !critical
-                    && !sprintKnockback
-                    && cooldown >= 0.848F
-                    && attacker.isOnGround()
-                    && !attacker.isSprinting()
-                    && attacker.getMainHandStack().isIn(net.minecraft.registry.tag.ItemTags.SWORDS)
-                    && attacker.getVelocity().horizontalLengthSquared() < 0.1D;
 
             net.minecraft.sound.SoundEvent attackSound;
             if (critical) {
@@ -221,37 +205,14 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // Let ClientWorld play the event with its own fresh sound seed.
-            // This follows vanilla's sound path and lets sounds.json choose among
-            // the weighted variants (for example, the six strong-hit samples).
-            client.world.playSound(
-                    attacker.getX(),
-                    attacker.getY(),
-                    attacker.getZ(),
-                    attackSound,
-                    SoundCategory.PLAYERS,
-                    1.0F,
-                    1.0F,
-                    true
-            );
-
-            // A real player also plays a hurt sound when damaged. Keep this quieter
-            // than the attack event so the impact is audible without overpowering it.
-            client.world.playSound(
-                    decoy.getX(),
-                    decoy.getY(),
-                    decoy.getZ(),
-                    SoundEvents.ENTITY_PLAYER_HURT,
-                    SoundCategory.PLAYERS,
-                    0.55F,
-                    1.0F,
-                    true
-            );
+            // Use the same entity sound path as vanilla PlayerEntity.attack().
+            // In particular, the critical event is played alone, at vanilla volume/pitch.
+            attacker.playSound(attackSound, 1.0F, 1.0F);
+            attacker.resetLastAttackedTicks();
         }
         BombHearts.onDamage(decoy, previousHealth);
 
         if (decoy.getHealth() <= 0.0f) {
-            // Survival has no fake kill message or score. MineStar preview keeps its local reward UI.
             if (GemShopMod.cfg.bombServer == 1) {
                 defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
                 localScore = 3 + (int) (Math.random() * 13);
@@ -263,7 +224,6 @@ public final class BombDecoy {
                 noticeUntil = 0L;
             }
             removeDecoy();
-            // Keep the real player's model hidden until the original Bomb timer expires.
         }
 
         return true;
