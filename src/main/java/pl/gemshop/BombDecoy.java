@@ -31,6 +31,8 @@ public final class BombDecoy {
     private static int localScore;
     private static int localRankGain;
     private static int noticeMode;
+    private static long deathRemoveAt;
+    private static boolean defeated;
 
     private BombDecoy() {}
 
@@ -48,6 +50,8 @@ public final class BombDecoy {
         localScore = 0;
         localRankGain = 0;
         noticeMode = 0;
+        deathRemoveAt = 0L;
+        defeated = false;
         BombHearts.reset();
     }
 
@@ -74,7 +78,14 @@ public final class BombDecoy {
             BombHearts.reset();
         }
 
-        if (!Mark.active()) return;
+        if (deathRemoveAt > 0L) {
+            if (System.currentTimeMillis() >= deathRemoveAt) {
+                removeDecoy();
+                deathRemoveAt = 0L;
+            }
+            return;
+        }
+        if (!Mark.active() || defeated) return;
         if (snapshotCreated) {
             // Laging is a local visual effect: move the copy toward the local
             // player in at most two steps, one per second, capped at 4 blocks.
@@ -207,7 +218,7 @@ public final class BombDecoy {
         // deals exactly 2 HP to the local copy. Charged hits use the configured
         // preview damage, matching the stronger vanilla attack tiers.
         float damage = cooldown < 0.848F
-                ? 2.0F
+                ? 1.0F
                 : Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
         float previousHealth = decoy.getHealth();
         float resultingHealth = Math.max(0.0f, previousHealth - damage);
@@ -218,22 +229,12 @@ public final class BombDecoy {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
             decoy.setHealth(resultingHealth);
 
-            net.minecraft.sound.SoundEvent attackSound;
-            if (critical) {
-                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
-                attacker.addCritParticles(decoy);
-            } else if (sprintKnockback) {
-                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK;
-            } else if (sweeping) {
-                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP;
-            } else if (cooldown < 0.848F) {
-                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_WEAK;
-            } else {
-                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
-            }
-
-            // Use the normal impact sound for critical hits too; the dedicated crit
-            // sound has a more pronounced swishing tone.
+            // Spam clicks use the weak hit sound. Every charged hit, including
+            // criticals and sword sweeps, uses the ordinary strong impact sound.
+            net.minecraft.sound.SoundEvent attackSound = cooldown < 0.848F
+                    ? SoundEvents.ENTITY_PLAYER_ATTACK_WEAK
+                    : SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
+            if (critical) attacker.addCritParticles(decoy);
             client.getSoundManager().play(
                     net.minecraft.client.sound.PositionedSoundInstance.master(attackSound, 1.0F)
             );
@@ -255,7 +256,10 @@ public final class BombDecoy {
                 localRankGain = 0;
                 noticeUntil = 0L;
             }
-            removeDecoy();
+            defeated = true;
+            // Keep the zero-health snapshot briefly so Minecraft can render its
+            // normal death animation instead of deleting it on the hit frame.
+            deathRemoveAt = System.currentTimeMillis() + 900L;
         }
 
         return true;
