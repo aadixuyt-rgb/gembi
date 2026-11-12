@@ -192,8 +192,11 @@ public final class BombDecoy {
             decoy.setHealth(resultingHealth);
 
             net.minecraft.sound.SoundEvent attackSound;
+            float attackPitch = 1.0F;
             if (critical) {
-                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_CRIT;
+                // Critical hits reuse the normal strong-hit sample, with a higher pitch.
+                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
+                attackPitch = 1.2F;
                 attacker.addCritParticles(decoy);
             } else if (sprintKnockback) {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK;
@@ -205,9 +208,8 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // Use the same entity sound path as vanilla PlayerEntity.attack().
-            // In particular, the critical event is played alone, at vanilla volume/pitch.
-            attacker.playSound(attackSound, 1.0F, 1.0F);
+            // Keep the normal entity sound path; critical hits only change its pitch.
+            attacker.playSound(attackSound, 1.0F, attackPitch);
             attacker.resetLastAttackedTicks();
         }
         BombHearts.onDamage(decoy, previousHealth);
