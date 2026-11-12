@@ -68,6 +68,8 @@ public class ModConfig {
     public int bombMode = 0;
     // 0 = Survival, 1 = MineStar, 2 = Duele MS.
     public int bombServer = 0;
+    // Wyświetlany limit licencji: 1 albo 2 sloty Bomb.
+    public int bombLicenseLimit = 1;
 
     public static ModConfig load() {
         try {
