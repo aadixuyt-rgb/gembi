@@ -220,7 +220,7 @@ public final class BombDecoy {
 
             net.minecraft.sound.SoundEvent attackSound;
             if (critical) {
-                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_CRIT;
+                attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
                 attacker.addCritParticles(decoy);
             } else if (sprintKnockback) {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK;
@@ -232,10 +232,10 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // The attack is client-side; boost the selected vanilla sound so
-            // normal, weak, knockback and critical hits are clearly audible.
+            // Use the normal impact sound for critical hits too; the dedicated crit
+            // sound has a more pronounced swishing tone.
             client.getSoundManager().play(
-                    net.minecraft.client.sound.PositionedSoundInstance.master(attackSound, 1.5F)
+                    net.minecraft.client.sound.PositionedSoundInstance.master(attackSound, 1.0F)
             );
             attacker.resetLastAttackedTicks();
         }
