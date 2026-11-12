@@ -26,6 +26,9 @@ public final class BombHearts {
     private static final List<FallingHeart> FALLING = new ArrayList<>();
     private static BombDecoyEntity trackedDecoy;
     private static float visualHealth;
+    private static float damageTrailHealth;
+    private static float damageTrailStartHealth;
+    private static long damageTrailStartedAt;
 
     private BombHearts() {}
 
@@ -33,12 +36,18 @@ public final class BombHearts {
         FALLING.clear();
         trackedDecoy = null;
         visualHealth = 0.0f;
+        damageTrailHealth = 0.0f;
+        damageTrailStartHealth = 0.0f;
+        damageTrailStartedAt = 0L;
     }
 
     private static void track(BombDecoyEntity decoy) {
         if (decoy != null && trackedDecoy != decoy) {
             trackedDecoy = decoy;
             visualHealth = decoy.getHealth();
+            damageTrailHealth = visualHealth;
+            damageTrailStartHealth = visualHealth;
+            damageTrailStartedAt = 0L;
         }
     }
 
@@ -63,11 +72,20 @@ public final class BombHearts {
 
     public static void onDamage(BombDecoyEntity decoy, float previousHealth) {
         if (decoy == null) return;
-        track(decoy);
-        // This setting affects only the displayed hearts, not actual damage/health.
+        // Initialize from the PRE-hit health. This callback runs after the
+        // entity health has already been reduced, so track() must not seed from
+        // decoy.getHealth() on the first hit.
+        if (trackedDecoy != decoy) {
+            trackedDecoy = decoy;
+            visualHealth = previousHealth;
+            damageTrailHealth = previousHealth;
+        }
         float lost = Math.max(0.0f, previousHealth - decoy.getHealth());
         if (lost <= 0.0f) return;
-        visualHealth = Math.max(0.0f, visualHealth - lost);
+        damageTrailStartHealth = Math.max(visualHealth, previousHealth);
+        damageTrailHealth = damageTrailStartHealth;
+        damageTrailStartedAt = System.currentTimeMillis();
+        visualHealth = decoy.getHealth();
         int count = Math.min(8, Math.max(1, (int) Math.ceil(lost / 2.0f)));
         long now = System.currentTimeMillis();
         for (int i = 0; i < count; i++) {
@@ -101,6 +119,15 @@ public final class BombHearts {
                 * mc.getWindow().getScaledHeight());
 
         float shownHealth = visualHealth(decoy);
+        // The red trailing section smoothly drains toward the real health value.
+        float trailHealth = shownHealth;
+        if (damageTrailStartedAt > 0L) {
+            float t = Math.min(1.0f, (System.currentTimeMillis() - damageTrailStartedAt) / 520.0f);
+            t = t * t * (3.0f - 2.0f * t);
+            trailHealth = damageTrailStartHealth + (shownHealth - damageTrailStartHealth) * t;
+            damageTrailHealth = trailHealth;
+            if (t >= 1.0f) damageTrailStartedAt = 0L;
+        }
         // Puste kontenery pokazują pełne MAX_HEALTH kopii, a wypełnienie jej aktualne HP.
         int healthIcons = (int) Math.ceil(Math.max(0.0f, decoy.getMaxHealth()) / 2.0f);
         int absorptionIcons = (int) Math.ceil(Math.max(0.0f, decoy.getAbsorptionAmount()) / 2.0f);
@@ -121,6 +148,11 @@ public final class BombHearts {
                     ctx.drawGuiTexture(RenderLayer::getGuiTextured, FULL, x, y, 9, 9);
                 } else if (remaining > 0.0f) {
                     ctx.drawGuiTexture(RenderLayer::getGuiTextured, HALF, x, y, 9, 9);
+                }
+                float redRemaining = trailHealth - i * 2.0f;
+                if (redRemaining > Math.max(0.0f, remaining)) {
+                    // Red translucent overlay marks the HP that was just lost.
+                    ctx.fill(x + 1, y + 1, x + 8, y + 8, 0x99FF263D);
                 }
             } else {
                 float remaining = decoy.getAbsorptionAmount() - (i - healthIcons) * 2.0f;
