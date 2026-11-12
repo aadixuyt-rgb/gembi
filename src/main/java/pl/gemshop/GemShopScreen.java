@@ -489,16 +489,8 @@ public class GemShopScreen extends Screen {
                 x + 55, y + 44, th.text, 0.72f, true);
         text("LICENCJA:", x + 184, y + 27, th.sub, 0.7f, true);
         text("##################", x + 184, y + 42, th.text, 0.68f, true);
-        text("LIMIT: " + (cfg.bombLicenseLimit == 2 ? "2" : "NO LIMIT"), x + 19, y + 96, th.text, 0.85f, true);
+        text("LIMIT: 1", x + 19, y + 96, th.text, 0.85f, true);
         text("Limit slotów Bomb", x + 19, y + 111, th.sub, 0.65f, false);
-
-        float sy = y + 143;
-        card(x, sy, w, 54);
-        text("Limit jednoczesnych oznaczeń", x + 10, sy + 9, th.text, 0.75f, true);
-        seg(x + w - 106, sy + 7, new String[]{"1", "2"},
-                cfg.bombLicenseLimit == 2 ? 1 : 0, 48,
-                i -> { cfg.bombLicenseLimit = i + 1; cfg.save(); });
-        text("Wybór limitu licencji", x + 10, sy + 32, th.sub, 0.66f, false);
     }
 
     // ------------------------------------------------------------------ zakladka: Gracz
