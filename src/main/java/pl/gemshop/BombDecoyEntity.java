@@ -35,8 +35,19 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
         // Capture exact orientation once, before spawn: no post-spawn tracking/teleporting.
         refreshPositionAndAngles(source.getX(), source.getY(), source.getZ(),
                 source.getYaw(), source.getPitch());
+        // Initialize interpolation history to the captured transform as well.
+        // Otherwise the renderer can interpolate from the entity's constructor
+        // position/rotation (often near the world origin), looking like a teleport
+        // and a sudden head turn on the first rendered frames.
+        prevYaw = source.getYaw();
+        prevPitch = source.getPitch();
+        lastRenderX = source.getX();
+        lastRenderY = source.getY();
+        lastRenderZ = source.getZ();
         setHeadYaw(source.getHeadYaw());
         setBodyYaw(source.getBodyYaw());
+        prevHeadYaw = source.getHeadYaw();
+        prevBodyYaw = source.getBodyYaw();
         setVelocity(0.0, 0.0, 0.0);
         setSneaking(source.isSneaking());
         setSprinting(source.isSprinting());
