@@ -215,7 +215,7 @@ public final class BombDecoy {
         if (decoy.getHealth() <= 0.0f) {
             if (GemShopMod.cfg.bombServer == 1) {
                 defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
-                localScore = 3 + (int) (Math.random() * 13);
+                localScore = 1 + (int) (Math.random() * 15);
                 FakeMineStarInventory.activate(decoy);
                 noticeUntil = System.currentTimeMillis() + 2_000L;
             } else {
