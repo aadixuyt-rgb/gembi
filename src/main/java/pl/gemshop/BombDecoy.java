@@ -78,14 +78,7 @@ public final class BombDecoy {
             BombHearts.reset();
         }
 
-        if (deathRemoveAt > 0L) {
-            if (System.currentTimeMillis() >= deathRemoveAt) {
-                removeDecoy();
-                deathRemoveAt = 0L;
-            }
-            return;
-        }
-        if (!Mark.active() || defeated) return;
+        if (!Mark.active()) return;
         if (snapshotCreated) {
             // Laging is a local visual effect: move the copy toward the local
             // player in at most two steps, one per second, capped at 4 blocks.
@@ -256,10 +249,7 @@ public final class BombDecoy {
                 localRankGain = 0;
                 noticeUntil = 0L;
             }
-            defeated = true;
-            // Keep the zero-health snapshot briefly so Minecraft can render its
-            // normal death animation instead of deleting it on the hit frame.
-            deathRemoveAt = System.currentTimeMillis() + 900L;
+            removeDecoy();
         }
 
         return true;
