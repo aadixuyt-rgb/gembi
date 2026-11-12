@@ -26,7 +26,7 @@ public final class BombKillNotice {
 
     private static void renderMineStar(net.minecraft.client.gui.DrawContext context, MinecraftClient mc) {
         int centerX = context.getScaledWindowWidth() / 2;
-        int top = Math.max(8, context.getScaledWindowHeight() / 5);
+        int top = Math.max(8, context.getScaledWindowHeight() / 2 - 12);
         String name = BombDecoy.noticeName();
         int bonus = BombDecoy.noticeScore();
         int rankGain = BombDecoy.noticeRankGain();
