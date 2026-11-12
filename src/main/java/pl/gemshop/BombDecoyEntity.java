@@ -6,6 +6,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.client.util.SkinTextures;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * Client-only frozen snapshot. All player rotations and pose are copied before
@@ -18,7 +19,7 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
                            AbstractClientPlayerEntity source) {
         super(world, profile);
         this.capturedSkin = source.getSkinTextures();
-        setCustomName(source.getDisplayName());
+        setCustomName(net.minecraft.text.Text.literal(profile.getName()));
         setCustomNameVisible(true);
         setNoGravity(true);
 
@@ -51,6 +52,34 @@ public final class BombDecoyEntity extends OtherClientPlayerEntity {
             setBoundingBox(new Box(x - 0.3, y, z - 0.3, x + 0.3, y + 0.6, z + 0.3));
         }
         setNoGravity(true);
+    }
+
+    /**
+     * Keep the visual copy moving with the real marked player. The original
+     * entity is hidden locally, but its live position/rotation/pose remains
+     * the source of truth so the copy does not look frozen in place.
+     */
+    public void followSource(AbstractClientPlayerEntity source) {
+        setPosition(source.getX(), source.getY(), source.getZ());
+        setYaw(source.getYaw());
+        setPitch(source.getPitch());
+        setHeadYaw(source.getHeadYaw());
+        setBodyYaw(source.getBodyYaw());
+        setVelocity(source.getVelocity());
+        setSneaking(source.isSneaking());
+        setSprinting(source.isSprinting());
+
+        if (source.isGliding() && !isGliding()) startGliding();
+        else if (!source.isGliding() && isGliding()) stopGliding();
+
+        if (source.isOnGround()) setOnGround(true);
+        else setOnGround(false);
+
+        // Keep the same visible pose/size while the player moves.
+        if (source.isGliding()) {
+            double x = getX(), y = getY(), z = getZ();
+            setBoundingBox(new Box(x - 0.3, y, z - 0.3, x + 0.3, y + 0.6, z + 0.3));
+        }
     }
 
     @Override
