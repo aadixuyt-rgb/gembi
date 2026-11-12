@@ -144,23 +144,23 @@ public final class Esp {
 
                 if (marked) {
                     boolean all = true;
-                    float minX = 1e9f, minY = 1e9f, maxX = -1e9f, maxY = -1e9f;
+                    float hudMinX = 1e9f, hudMinY = 1e9f, hudMaxX = -1e9f, hudMaxY = -1e9f;
                     for (int i = 0; i < 8; i++) {
                         if (c[i].w < NEAR) { all = false; break; }
                         float x = (c[i].x / c[i].w * 0.5f + 0.5f) * sw;
                         float y = (1f - (c[i].y / c[i].w * 0.5f + 0.5f)) * sh;
-                        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
-                        minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+                        hudMinX = Math.min(hudMinX, x); hudMaxX = Math.max(hudMaxX, x);
+                        hudMinY = Math.min(hudMinY, y); hudMaxY = Math.max(hudMaxY, y);
                     }
                     if (all) {
-                        g.fill((int) minX, (int) minY, (int) maxX, (int) maxY, 0x28FF5B7F);
-                        float len = Math.max(3f, Math.min(8f, (maxX - minX) / 3f));
+                        g.fill((int) hudMinX, (int) hudMinY, (int) hudMaxX, (int) hudMaxY, 0x28FF5B7F);
+                        float len = Math.max(3f, Math.min(8f, (hudMaxX - hudMinX) / 3f));
                         int bc = 0xFFFF5B7F;
-                        Gfx.line(g, minX, minY, minX + len, minY, 1.4f, bc); Gfx.line(g, minX, minY, minX, minY + len, 1.4f, bc);
-                        Gfx.line(g, maxX, minY, maxX - len, minY, 1.4f, bc); Gfx.line(g, maxX, minY, maxX, minY + len, 1.4f, bc);
-                        Gfx.line(g, minX, maxY, minX + len, maxY, 1.4f, bc); Gfx.line(g, minX, maxY, minX, maxY - len, 1.4f, bc);
-                        Gfx.line(g, maxX, maxY, maxX - len, maxY, 1.4f, bc); Gfx.line(g, maxX, maxY, maxX, maxY - len, 1.4f, bc);
-                        drawLabel(g, mc, p, (minX + maxX) / 2f, minY, Math.max(44, Math.min(120, (maxX - minX) * 4.0f)), sw, sh);
+                        Gfx.line(g, hudMinX, hudMinY, hudMinX + len, hudMinY, 1.4f, bc); Gfx.line(g, hudMinX, hudMinY, hudMinX, hudMinY + len, 1.4f, bc);
+                        Gfx.line(g, hudMaxX, hudMinY, hudMaxX - len, hudMinY, 1.4f, bc); Gfx.line(g, hudMaxX, hudMinY, hudMaxX, hudMinY + len, 1.4f, bc);
+                        Gfx.line(g, hudMinX, hudMaxY, hudMinX + len, hudMaxY, 1.4f, bc); Gfx.line(g, hudMinX, hudMaxY, hudMinX, hudMaxY - len, 1.4f, bc);
+                        Gfx.line(g, hudMaxX, hudMaxY, hudMaxX - len, hudMaxY, 1.4f, bc); Gfx.line(g, hudMaxX, hudMaxY, hudMaxX, hudMaxY - len, 1.4f, bc);
+                        drawLabel(g, mc, p, (hudMinX + hudMaxX) / 2f, hudMinY, Math.max(44, Math.min(120, (hudMaxX - hudMinX) * 4.0f)), sw, sh);
                     }
 
                 }
