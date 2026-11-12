@@ -222,11 +222,10 @@ public final class BombDecoy {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
             decoy.setHealth(resultingHealth);
 
-            // Spam clicks use the weak hit sound. Every charged hit, including
-            // criticals and sword sweeps, uses the ordinary strong impact sound.
-            net.minecraft.sound.SoundEvent attackSound = cooldown < 0.848F
-                    ? SoundEvents.ENTITY_PLAYER_ATTACK_WEAK
-                    : SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
+            // Always use the same ordinary impact sound for every local hit.
+            // Do not switch to WEAK/SWEEP/CRIT sounds: those can sound like a
+            // sword whoosh instead of the consistent hit sound requested.
+            net.minecraft.sound.SoundEvent attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             if (critical) attacker.addCritParticles(decoy);
             client.getSoundManager().play(
                     net.minecraft.client.sound.PositionedSoundInstance.master(attackSound, 1.0F)
