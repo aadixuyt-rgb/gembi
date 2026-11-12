@@ -270,7 +270,8 @@ public class GemShopScreen extends Screen {
             drawHeader();
             if (tab == 0) drawPlayers();
             else if (tab == 1) drawVisuals();
-            else drawSettings();
+            else if (tab == 2) drawSettings();
+            else drawLicense();
             drawNav();
         }
         if (!shatter) glowBorder();
@@ -444,18 +445,19 @@ public class GemShopScreen extends Screen {
     }
 
     private void drawNav() {
-        float nx = (W - 122) / 2f, ny = H - 40;
-        rr(nx, ny, 122, 34, 10, th.card);
-        String[] names = {"Gracz", "Visuals", "Ustawienia"};
-        for (int i = 0; i < 3; i++) {
+        float nw = 178f, item = 43f;
+        float nx = (W - nw) / 2f, ny = H - 40;
+        rr(nx, ny, nw, 34, 10, th.card);
+        String[] names = {"Gracz", "Visuals", "Ustaw.", "Licencja"};
+        for (int i = 0; i < 4; i++) {
             final int ti = i;
-            float x = nx + 3 + i * 39.3f;
+            float x = nx + 3 + i * item;
             boolean sel = tab == i;
-            boolean hv = hit(x, ny + 3, 39, 28, () -> { if (ti == 0 && tab == 0) { profileId = null; scroll[3] = 0; } tab = ti; });
-            if (sel) rr(x, ny + 3, 39, 28, 8, Gfx.alpha(accent, 0.22f));
-            else if (hv) rr(x, ny + 3, 39, 28, 8, th.cardHover);
+            boolean hv = hit(x, ny + 3, item - 1, 28, () -> { if (ti == 0 && tab == 0) { profileId = null; scroll[3] = 0; } tab = ti; });
+            if (sel) rr(x, ny + 3, item - 1, 28, 8, Gfx.alpha(accent, 0.22f));
+            else if (hv) rr(x, ny + 3, item - 1, 28, 8, th.cardHover);
             int col = sel ? accent : th.sub;
-            float icx = x + 19.5f, icy = ny + 12;
+            float icx = x + (item - 1) / 2f, icy = ny + 12;
             if (i == 0) {
                 circle(icx, icy - 2.5f, 3.2f, col);
                 rr(icx - 5, icy + 1.5f, 10, 5, 2.5f, col);
@@ -463,12 +465,40 @@ public class GemShopScreen extends Screen {
                 line(icx - 6, icy, icx, icy - 4, 1.2f, col); line(icx, icy - 4, icx + 6, icy, 1.2f, col);
                 line(icx + 6, icy, icx, icy + 4, 1.2f, col); line(icx, icy + 4, icx - 6, icy, 1.2f, col);
                 circle(icx, icy, 1.8f, col);
-            } else {
+            } else if (i == 2) {
                 line(icx - 6, icy - 3, icx + 6, icy - 3, 1.2f, col); line(icx - 6, icy + 3, icx + 6, icy + 3, 1.2f, col);
                 circle(icx - 2, icy - 3, 2, col); circle(icx + 2, icy + 3, 2, col);
+            } else {
+                rr(icx - 5, icy - 5, 10, 11, 2, col);
+                line(icx - 2.5f, icy - 1, icx + 2.5f, icy - 1, 0.9f, th.bg);
+                line(icx - 2.5f, icy + 2, icx + 2.5f, icy + 2, 0.9f, th.bg);
             }
-            ctext(names[i], icx, ny + 20.5f, col, 0.6f, sel);
+            ctext(names[i], icx, ny + 20.5f, col, 0.56f, sel);
         }
+    }
+
+    private void drawLicense() {
+        float x = 12, y = 48, w = W - 24;
+        card(x, y, w, 126);
+        rr(x + 9, y + 9, w - 18, 72, 8, th.solid);
+        if (mc.player != null) {
+            PlayerSkinDrawer.draw(g, mc.player.getSkinTextures(), X(x + 19), Y(y + 25), Math.max(8, S(28)));
+        }
+        text("OWNER", x + 55, y + 29, accent, 0.9f, true);
+        text(mc.player == null ? "Gracz" : mc.player.getGameProfile().getName(),
+                x + 55, y + 44, th.text, 0.72f, true);
+        text("LICENCJA:", x + 184, y + 27, th.sub, 0.7f, true);
+        text("##################", x + 184, y + 42, th.text, 0.68f, true);
+        text("LIMIT: " + (cfg.bombLicenseLimit == 2 ? "2" : "NO LIMIT"), x + 19, y + 96, th.text, 0.85f, true);
+        text("Limit slotów Bomb", x + 19, y + 111, th.sub, 0.65f, false);
+
+        float sy = y + 143;
+        card(x, sy, w, 54);
+        text("Limit jednoczesnych oznaczeń", x + 10, sy + 9, th.text, 0.75f, true);
+        seg(x + w - 106, sy + 7, new String[]{"1", "2"},
+                cfg.bombLicenseLimit == 2 ? 1 : 0, 48,
+                i -> { cfg.bombLicenseLimit = i + 1; cfg.save(); });
+        text("Wybór limitu licencji", x + 10, sy + 32, th.sub, 0.66f, false);
     }
 
     // ------------------------------------------------------------------ zakladka: Gracz
