@@ -76,10 +76,7 @@ public final class BombDecoy {
 
         if (!Mark.active()) return;
         if (snapshotCreated) {
-            AbstractClientPlayerEntity source = findSource(client.world);
-            if (source != null && decoy != null && !decoy.isRemoved()) {
-                decoy.followSource(source);
-            }
+            // Keep the captured copy frozen in its original position and pose.
             BombHearts.tick(decoy);
             return;
         }
@@ -101,11 +98,6 @@ public final class BombDecoy {
         GameProfile localProfile = new GameProfile(UUID.randomUUID(), sourceProfile.getName());
 
         BombDecoyEntity copy = new BombDecoyEntity(world, localProfile, source);
-        // Keep only the real account nickname; do not copy server rank/custom tags.
-        String plainName = sourceProfile.getName();
-        if (plainName != null && !plainName.isBlank()) {
-            Mark.name = plainName;
-        }
         copy.setId(nextLocalEntityId--);
         world.addEntity(copy);
 
@@ -223,7 +215,7 @@ public final class BombDecoy {
 
         if (decoy.getHealth() <= 0.0f) {
             if (GemShopMod.cfg.bombServer == 1 || GemShopMod.cfg.bombServer == 2) {
-                defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
+                defeatedName = decoy.getGameProfile().getName();
                 noticeMode = GemShopMod.cfg.bombServer;
                 localScore = noticeMode == 1 ? 1 + (int) (Math.random() * 15) : 0;
                 localRankGain = noticeMode == 1 ? 1 + (int) (Math.random() * 15) : 0;
