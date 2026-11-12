@@ -29,6 +29,7 @@ public final class BombDecoy {
     private static int lagStage;
     private static long nextLagUpdateAt;
     private static int localScore;
+    private static int localRankGain;
 
     private BombDecoy() {}
 
@@ -44,6 +45,7 @@ public final class BombDecoy {
         lagStage = 0;
         nextLagUpdateAt = 0L;
         localScore = 0;
+        localRankGain = 0;
         BombHearts.reset();
     }
 
@@ -216,11 +218,13 @@ public final class BombDecoy {
             if (GemShopMod.cfg.bombServer == 1) {
                 defeatedName = Mark.name == null ? decoy.getNameForScoreboard() : Mark.name;
                 localScore = 1 + (int) (Math.random() * 15);
+                localRankGain = 1 + (int) (Math.random() * 15);
                 FakeMineStarInventory.activate(decoy);
                 noticeUntil = System.currentTimeMillis() + 2_000L;
             } else {
                 defeatedName = null;
                 localScore = 0;
+                localRankGain = 0;
                 noticeUntil = 0L;
             }
             removeDecoy();
@@ -230,6 +234,7 @@ public final class BombDecoy {
     }
 
     public static int noticeScore() { return localScore; }
+    public static int noticeRankGain() { return localRankGain; }
 
     public static boolean noticeActive() {
         return defeatedName != null && System.currentTimeMillis() < noticeUntil;
