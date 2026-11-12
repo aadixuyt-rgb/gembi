@@ -34,6 +34,7 @@ public class GemShopMod implements ClientModInitializer {
         });
         WorldRenderEvents.END.register(Esp::capture);
         HudRenderCallback.EVENT.register((g, tc) -> Esp.renderHud(g));
+        BombKillNotice.register();
 
         // AdixFX jest częścią jednego moda GemShop: rejestruje własne GUI, muzykę i efekty.
         pl.adixfx.AdixFxMod adixFx = new pl.adixfx.AdixFxMod();
