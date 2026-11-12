@@ -201,7 +201,12 @@ public final class BombDecoy {
                 && attacker.getMainHandStack().isIn(net.minecraft.registry.tag.ItemTags.SWORDS)
                 && attacker.getVelocity().horizontalLengthSquared() < 0.1D;
 
-        float damage = Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
+        // An undercharged hit (spam-clicking before the cooldown is ready)
+        // deals exactly 2 HP to the local copy. Charged hits use the configured
+        // preview damage, matching the stronger vanilla attack tiers.
+        float damage = cooldown < 0.848F
+                ? 2.0F
+                : Math.max(0.5f, Math.min(10.0f, GemShopMod.cfg.previewDamageHearts)) * 2.0f;
         float previousHealth = decoy.getHealth();
         float resultingHealth = Math.max(0.0f, previousHealth - damage);
         MinecraftClient client = MinecraftClient.getInstance();
@@ -225,9 +230,13 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // Use the normal player sound path, like vanilla attacks.
-            // SoundManager then selects the weighted variant from sounds.json.
-            attacker.playSound(attackSound, 1.0F, 1.0F);
+            // This attack is handled client-side, so play the selected vanilla
+            // attack sound directly through the client SoundManager.
+            // This avoids PlayerEntity.playSound being routed through a server-only
+            // entity sound path and prevents the generic failed-hit sound.
+            client.getSoundManager().play(
+                    net.minecraft.client.sound.PositionedSoundInstance.master(attackSound, 1.0F)
+            );
             attacker.resetLastAttackedTicks();
         }
         BombHearts.onDamage(decoy, previousHealth);
