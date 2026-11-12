@@ -30,6 +30,7 @@ public final class Esp {
     private static Vec3d cam = Vec3d.ZERO;
     private static boolean valid;
     private static float partial;
+    private static final int[] EDGE_BITS = {1, 2, 4};
 
     private Esp() {}
 
@@ -64,35 +65,13 @@ public final class Esp {
         Vec3d start = mc.player.getCameraPosVec(pt);
         Vec3d end = start.add(mc.player.getRotationVec(pt).multiply(160));
 
-        // Najpierw zachowaj dotychczasowe, precyzyjne trafienie celownikiem.
+        // Jedno precyzyjne przejście po graczach. Dodatkowy stożek fallback
+        // wymagał drugiego raycastu dla każdego gracza w każdej klatce HUD.
         AbstractClientPlayerEntity best = null;
         double bestDistance = Double.MAX_VALUE;
         for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
             if (p == mc.player || p.isSpectator() || BombDecoy.shouldHide(p)) continue;
             Optional<Vec3d> hit = p.getBoundingBox().expand(0.15).raycast(start, end);
-            if (hit.isPresent()) {
-                double distance = start.squaredDistanceTo(hit.get());
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    best = p;
-                }
-            }
-        }
-        if (best != null) return best;
-
-        // Gdy promień nie trafił dokładnie w gracza, użyj wąskiego stożka
-        // wokół celownika. Wybierany jest najbliższy gracz wzdłuż kierunku patrzenia.
-        final double maxFallbackDistance = 64.0;
-        final double coneAngleRadians = Math.toRadians(3.0);
-        bestDistance = Double.MAX_VALUE;
-        for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
-            if (p == mc.player || p.isSpectator() || BombDecoy.shouldHide(p)) continue;
-
-            double targetDistance = start.distanceTo(p.getBoundingBox().getCenter());
-            if (targetDistance > maxFallbackDistance) continue;
-
-            double coneRadius = Math.tan(coneAngleRadians) * targetDistance;
-            Optional<Vec3d> hit = p.getBoundingBox().expand(0.15 + coneRadius).raycast(start, end);
             if (hit.isPresent()) {
                 double distance = start.squaredDistanceTo(hit.get());
                 if (distance < bestDistance) {
@@ -147,16 +126,20 @@ public final class Esp {
                     double height = (b.maxY - b.minY) * cfg.hitboxHeight;
                     b = new Box(cx - halfX, b.minY, cz - halfZ, cx + halfX, b.minY + height, cz + halfZ);
                 }
-                double[] xs = {b.minX, b.maxX}, ys = {b.minY, b.maxY}, zs = {b.minZ, b.maxZ};
+                double minX = b.minX, maxX = b.maxX;
+                double minY = b.minY, maxY = b.maxY;
+                double minZ = b.minZ, maxZ = b.maxZ;
                 for (int i = 0; i < 8; i++) {
-                    c[i].set((float) (xs[i & 1] - cam.x), (float) (ys[(i >> 1) & 1] - cam.y), (float) (zs[(i >> 2) & 1] - cam.z), 1f);
+                    c[i].set((float) ((i & 1) == 0 ? minX - cam.x : maxX - cam.x),
+                            (float) (((i >> 1) & 1) == 0 ? minY - cam.y : maxY - cam.y),
+                            (float) (((i >> 2) & 1) == 0 ? minZ - cam.z : maxZ - cam.z), 1f);
                     VP.transform(c[i]);
                 }
                 boolean isLooked = p == looked;
                 int col = isLooked ? 0xFFFF3B3B : marked ? 0xFFFF5B7F : 0xB8FFFFFF;
                 float lw = (isLooked || marked) ? 1.1f : 0.8f;
                 for (int i = 0; i < 8; i++)
-                    for (int bit : new int[]{1, 2, 4})
+                    for (int bit : EDGE_BITS)
                         if ((i & bit) == 0) clipLine(g, c[i], c[i | bit], sw, sh, lw, col);
 
                 if (marked) {
