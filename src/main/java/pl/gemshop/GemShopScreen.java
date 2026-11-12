@@ -877,8 +877,8 @@ public class GemShopScreen extends Screen {
         float serverY = modeY + 39;
         card(12, serverY, W - 24, 34);
         text("Serwer nagród", 22, serverY + 12, th.text, 0.72f, true);
-        seg(W - 22 - 132, serverY + 8, new String[]{"Survival", "MineStar"},
-                cfg.bombServer == 1 ? 1 : 0, 64, i -> { cfg.bombServer = i; cfg.save(); });
+        seg(W - 22 - 196, serverY + 8, new String[]{"Survival", "MineStar", "Duele MS"},
+                Math.max(0, Math.min(2, cfg.bombServer)), 64, i -> { cfg.bombServer = i; cfg.save(); });
 
         endScissor();
     }
