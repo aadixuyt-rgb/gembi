@@ -208,9 +208,7 @@ public final class Esp {
 
         // These hearts are drawn only for the local Bomb snapshot.
         BombHearts.render(g);
-        if (BombDecoy.noticeActive()) {
-            drawCopyDefeatNotice(g, mc, BombDecoy.noticeName());
-        }
+        // Kill notice is rendered once by BombKillNotice, centered on screen.
     }
 
     /**
