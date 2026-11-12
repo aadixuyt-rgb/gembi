@@ -65,7 +65,8 @@ public final class BombHearts {
         if (decoy == null) return;
         track(decoy);
         // This setting affects only the displayed hearts, not actual damage/health.
-        float lost = Math.max(0.5f, GemShopMod.cfg.previewDamageHearts) * 2.0f;
+        float lost = Math.max(0.0f, previousHealth - decoy.getHealth());
+        if (lost <= 0.0f) return;
         visualHealth = Math.max(0.0f, visualHealth - lost);
         int count = Math.min(8, Math.max(1, (int) Math.ceil(lost / 2.0f)));
         long now = System.currentTimeMillis();
