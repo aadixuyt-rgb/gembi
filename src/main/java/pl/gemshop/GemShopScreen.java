@@ -428,7 +428,7 @@ public class GemShopScreen extends Screen {
     private void drawHeader() {
         gem(12, 8, 18, accent);
         text("Gem Shop", 36, 8, th.text, 1f, true);
-        String sub = tab == 0 ? (profileId != null ? "Gracz \u00b7 profil" : "Gracz") : tab == 1 ? "Visuals" : "Ustawienia";
+        String sub = tab == 0 ? (profileId != null ? "Gracz \u00b7 profil" : "Gracz") : tab == 1 ? "Visuals" : tab == 2 ? "Ustawienia" : "Licencja";
         text(sub, 36, 20, th.sub, 0.72f, false);
         if (Mark.cooldownActive()) {
             String t = "1 cooldown";
