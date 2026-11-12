@@ -76,7 +76,26 @@ public final class BombDecoy {
 
         if (!Mark.active()) return;
         if (snapshotCreated) {
-            // Keep the captured copy frozen in its original position and pose.
+            // Laging is a local visual effect: move the copy toward the local
+            // player in at most two steps, one per second, capped at 4 blocks.
+            // Do not rotate the copy or move the real player/source entity.
+            if (GemShopMod.cfg.bombMode == 1 && decoy != null && !decoy.isRemoved()
+                    && lagStage < 2 && System.currentTimeMillis() >= nextLagUpdateAt) {
+                double dx = client.player.getX() - decoy.getX();
+                double dy = client.player.getY() - decoy.getY();
+                double dz = client.player.getZ() - decoy.getZ();
+                double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                if (distance > 1.0E-4D) {
+                    double step = Math.min(4.0D, distance);
+                    decoy.setPosition(
+                            decoy.getX() + dx / distance * step,
+                            decoy.getY() + dy / distance * step,
+                            decoy.getZ() + dz / distance * step
+                    );
+                }
+                lagStage++;
+                nextLagUpdateAt = System.currentTimeMillis() + 1_000L;
+            }
             BombHearts.tick(decoy);
             return;
         }
