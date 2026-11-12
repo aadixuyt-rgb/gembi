@@ -205,16 +205,9 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // Match FakePlayer's positional world playback so the client sound manager
-            // resolves the SoundEvent's weighted variants normally.
-            client.world.playSound(
-                    null,
-                    attacker.getX(), attacker.getY(), attacker.getZ(),
-                    attackSound,
-                    attacker.getSoundCategory(),
-                    1.0F,
-                    1.0F
-            );
+            // Use the normal player sound path, like vanilla attacks.
+            // SoundManager then selects the weighted variant from sounds.json.
+            attacker.playSound(attackSound, 1.0F, 1.0F);
             attacker.resetLastAttackedTicks();
         }
         BombHearts.onDamage(decoy, previousHealth);
