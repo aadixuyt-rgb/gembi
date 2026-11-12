@@ -222,10 +222,9 @@ public final class BombDecoy {
             decoy.clientDamage(client.world.getDamageSources().playerAttack(attacker));
             decoy.setHealth(resultingHealth);
 
-            // Always use the same ordinary impact sound for every local hit.
-            // Do not switch to WEAK/SWEEP/CRIT sounds: those can sound like a
-            // sword whoosh instead of the consistent hit sound requested.
-            net.minecraft.sound.SoundEvent attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
+            // Use vanilla sweep attack audio; Minecraft randomly selects
+            // one of the sweep1-sweep7 variants for each playback.
+            net.minecraft.sound.SoundEvent attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP;
             if (critical) attacker.addCritParticles(decoy);
             client.getSoundManager().play(
                     net.minecraft.client.sound.PositionedSoundInstance.master(attackSound, 1.0F)
