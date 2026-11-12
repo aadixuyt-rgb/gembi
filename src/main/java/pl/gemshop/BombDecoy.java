@@ -230,12 +230,10 @@ public final class BombDecoy {
                 attackSound = SoundEvents.ENTITY_PLAYER_ATTACK_STRONG;
             }
 
-            // This attack is handled client-side, so play the selected vanilla
-            // attack sound directly through the client SoundManager.
-            // This avoids PlayerEntity.playSound being routed through a server-only
-            // entity sound path and prevents the generic failed-hit sound.
+            // The attack is client-side; boost the selected vanilla sound so
+            // normal, weak, knockback and critical hits are clearly audible.
             client.getSoundManager().play(
-                    net.minecraft.client.sound.PositionedSoundInstance.master(attackSound, 1.0F)
+                    net.minecraft.client.sound.PositionedSoundInstance.master(attackSound, 1.5F)
             );
             attacker.resetLastAttackedTicks();
         }
