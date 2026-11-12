@@ -178,8 +178,10 @@ public final class BombDecoy {
         // Read the cooldown and fall state before resetting the attack timer.
         float cooldown = attacker.getAttackCooldownProgress(0.5F);
         boolean livingTarget = decoy instanceof net.minecraft.entity.LivingEntity;
+        // Treat a falling hit as critical even when the vanilla attack
+        // cooldown is not fully charged. Critical sound/particles take priority
+        // over the weak-hit sound for this local Bomb preview.
         boolean critical = livingTarget
-                && cooldown >= 0.848F
                 && attacker.fallDistance > 0.0F
                 && !attacker.isOnGround()
                 && !attacker.isClimbing()
